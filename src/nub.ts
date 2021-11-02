@@ -1,6 +1,6 @@
 //export const Greeter = (name: string) => `Hello ${name}`;
 /**
- * Battleship Connect: Enables seamless interaction with the Battleship Smart Contracts
+ * Nubian Coven SDK
  * @author Ebube Ud <kripsonud@gmail.com>
  */
 
@@ -89,19 +89,7 @@ export class NUB{
     })
   }
 
-   /**
-    * The leafs of the merkle tree will be generated using the tiles in the 10 by 10 battleship board.
-    * The Positions occupied by the ship will be indicated by the id of the ship to
-   * @param {number[]} tilesOccupiedByDestroyer - The Tiles occupied by the Destroyer Ship eg [11,12]
-   * @param {number[]} tilesOccupiedBySubmarine - The Tiles occupied by the Submarine Ship eg [21,22,23]
-   * @param {number[]} tilesOccupiedByCruiser - The Tiles occupied by the Cruiser Ship eg [31,32,33]
-   * @param {number[]} tilesOccupiedByBattleship - The Tiles occupied by the Battleship Ship eg [41,42,43,44]
-   * @param {number[]} tilesOccupiedByCarrier - The Tiles occupied by the Carrier Ship eg [51,52,53,54,55]
-   */
-    generateMerkleTreeFromShipPositions = (tilesOccupiedByDestroyer: number[], tilesOccupiedBySubmarine: number[], tilesOccupiedByCruiser: number[], tilesOccupiedByBattleship: number[], tilesOccupiedByCarrier: number[]) => 
-    {
-        
-    }
+
 
     public Spell() {
         const vm = this

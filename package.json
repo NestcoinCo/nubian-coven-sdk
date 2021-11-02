@@ -17,27 +17,26 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Blockchain-Battleship/battleship-sdk.git"
+    "url": "git+https://github.com/NestcoinCo/nubian-coven-sdk"
   },
   "keywords": [
-    "blockchain",
-    "battleship",
+    "nubian",
+    "coven",
     "sdk",
     "connect",
     "contracts",
     "ethereum",
     "wallet",
-    "blockchain-battleship",
-    "polygon",
-    "biconomy",
-    "cocos"
+    "aggregator",
+    "bsc",
+    "nestcoin"
   ],
   "author": "Ebube Ud",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Blockchain-Battleship/battleship-sdk/issues"
+    "url": "https://github.com/NestcoinCo/nubian-coven-sdk/issues"
   },
-  "homepage": "https://github.com/Blockchain-Battleship/battleship-sdk#readme",
+  "homepage": "https://github.com/NestcoinCo/nubian-coven-sdk#readme",
   "devDependencies": {
     "@types/jest": "^27.0.2",
     "jest": "^27.3.1",
