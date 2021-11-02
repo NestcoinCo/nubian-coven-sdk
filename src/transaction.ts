@@ -13,7 +13,7 @@ export class Transaction {
     return new Promise(async (resolve, reject) => {
       if (transactionConfig.to == Addresses.genesis)
         throw Error(
-          `Please configure the DSA instance by calling dsa.setInstance(dsaId). More details: https://docs.nubian.com/setup`
+          `Please ensure that the implementations contract address has been set and is valid`
         )
 
       if (this.nub.config.mode == 'node') {
@@ -73,7 +73,7 @@ export class Transaction {
    * @returns Transaction hash.
    */
   speedUp = async (
-    dsa: NUB,
+    nub: NUB,
     params: { transactionHash: string; gasPrice: NonNullable<TransactionConfig['gasPrice']> }
   ) => {
     if (!params.transactionHash) throw new Error("Parameter 'transactionHash' is not defined.")

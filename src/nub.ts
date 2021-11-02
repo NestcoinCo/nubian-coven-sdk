@@ -81,11 +81,24 @@ export class NUB{
 
 
   /**
-   * @param config A `web3` instance or a DSAConfig
+   * @param config A `web3` instance or a NUBConfig
+   * @param chainId Indicates the chain id. Defaults to 56 (BSC Main net)
    */
-   constructor(config: Web3, chainId: ChainId = 56) {
+   constructor(config: Web3 | NUBConfig, chainId: ChainId = 56) {
+    this.CHAIN_ID = chainId;
     this.config = getNUBConfig(config)
     this.config.web3.eth.getChainId().then((_chainId) => {
+        if(this.CHAIN_ID != _chainId)
+        {
+            throw new Error(
+                `chainId doesn't match with the web3. Initiate 'nub' like this: 'const nub = new NUB(web3, chainId)'`
+              )
+        }
+        if (![56, 97].includes(chainId)) {
+            throw new Error(`chainId '${_chainId}' is not supported.`)
+          } else {
+            this.CHAIN_ID = _chainId as ChainId
+          }
     })
   }
 
@@ -203,6 +216,47 @@ export class NUB{
     
 }
 
-function getNUBConfig(config: Web3): NUBConfig {
-     return { web3: config, mode: 'browser' }
+// Used defined Typeguard
+// https://www.typescriptlang.org/docs/handbook/advanced-types.html#user-defined-type-guards
+function isWeb3(config: Web3 | NUBConfig): config is Web3 {
+    return !!(config as Web3).version
+  }
+  
+
+function getNUBConfig(config: Web3 | NUBConfig): NUBConfig {
+    if (!config) throw new Error('Invalid config. Pass web3 instance or NUBConfig.')
+
+    if (isWeb3(config)) return { web3: config, mode: 'browser' }
+  
+    if (!config.web3) throw new Error('Invalid config. Pass web3 instance or NUBConfig.')
+  
+    if (config.mode === 'node') {
+      if (!config.privateKey) throw new Error(`Property 'privateKey' is not defined in config.`)
+  
+      const privateKey = config.privateKey.slice(0, 2) != '0x' ? '0x' + config.privateKey : config.privateKey
+  
+      return {
+        web3: config.web3,
+        mode: config.mode,
+        privateKey,
+      }
+    } else if (config.mode === 'simulation') {
+      if (!config.publicKey) throw new Error(`Property 'publicKey' is not defined in config.`)
+      if (!config.web3.utils.isAddress(config.publicKey.toLowerCase()))
+        throw new Error(`Property 'publicKey' is not a address.`)
+  
+      const publicKey = config.web3.utils.toChecksumAddress(config.publicKey.toLowerCase())
+      return {
+        web3: config.web3,
+        mode: 'simulation',
+        publicKey: publicKey,
+      }
+    } else if (!config.mode || config.mode === 'browser') {
+      return {
+        web3: config.web3,
+        mode: 'browser',
+      }
+    } else {
+      throw new Error(`Mode '${config.mode}' not recognized. Use 'node' or 'browser' as mode.`)
+    }
 }

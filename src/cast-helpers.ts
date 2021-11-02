@@ -26,7 +26,7 @@ export class CastHelpers {
 
     if (to === Addresses.genesis)
       throw new Error(
-        `Please configure the DSA instance by calling dsa.setInstance(dsaId). More details: https://docs.nubian.com/setup`
+        `Please verify that the address of the implementation contract has been set and is valid`
       )
 
     const { targets, spells } = this.nub.internal.encodeSpells(params)

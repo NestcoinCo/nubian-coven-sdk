@@ -81,7 +81,7 @@ export class Internal {
   }
 
   /**
-   * Returns the ABI interface for any DSA contract.
+   * Returns the ABI interface for any NUB contract.
    */
   getInterface = (abiItems: AbiItem[], method: string) => {
     const abiItem = abiItems.find((abiItem) => abiItem.name === method)
@@ -126,7 +126,7 @@ export class Internal {
   encodeSpells = (params: Spells | { spells: Spells }, version: Version = this.nub.VERSION) => {
     let spells = this.nub.castHelpers.flashBorrowSpellsConvert(this.getSpells(params))
     console.log("Spells: ", spells)
-    // Convert the spell.connector into required version. Eg: compound => COMPOUND-A for DSAv2
+    // Convert the spell.connector into required version. Eg: compound => COMPOUND-A for NUBv2
     spells.data = spells.data.map(spell => Number(version) === 1 ?
       {...spell, connector: spell.connector} :
       hasKey(connectorV2Mapping, spell.connector) ? 
