@@ -1,8 +1,8 @@
-//export const Greeter = (name: string) => `Hello ${name}`;
 /**
  * Nubian Coven SDK
  * @author Ebube Ud <kripsonud@gmail.com>
  */
+/* tslint:disable:max-classes-per-file */
 
 
  import Web3 from 'web3'
@@ -88,7 +88,7 @@ export class NUB{
     this.CHAIN_ID = chainId;
     this.config = getNUBConfig(config)
     this.config.web3.eth.getChainId().then((_chainId) => {
-        if(this.CHAIN_ID != _chainId)
+        if(this.CHAIN_ID !== _chainId)
         {
             throw new Error(
                 `chainId doesn't match with the web3. Initiate 'nub' like this: 'const nub = new NUB(web3, chainId)'`
@@ -126,11 +126,11 @@ export class NUB{
               console.log('No spells casted. Add spells with `.add(...)`.')
               return
             }    
-            let gas =  await vm.castHelpers.estimateGas({ spells: this, ...params });
-            let price = await this.getCurrentGasPrices(true)
+            const gas =  await vm.castHelpers.estimateGas({ spells: this, ...params });
+            const price = await this.getCurrentGasPrices(true)
             return {
-              gas: gas,
-              price: price,
+              gas,
+              price,
               fee: gas * price
             }
           }
@@ -154,7 +154,7 @@ export class NUB{
     
     
          getCurrentGasPrices =  async(useFixedPrice : boolean) => {
-        let price = 5000000000;
+         const price = 5000000000;
  
 
         return  price;
@@ -183,12 +183,12 @@ export class NUB{
     
         const transactionConfig = await this.internal.getTransactionConfig({
           from: mergedParams.from,
-          to: mergedParams.to, //Contract address of the implementations contract
+          to: mergedParams.to, // Contract address of the implementations contract
           gas: mergedParams.gas,
           gasPrice: mergedParams.gasPrice,
           nonce: mergedParams.nonce,
           value: mergedParams.value,
-          data: data, //Data should be generated using the abi of the implementations contract
+          data, // Data should be generated using the abi of the implementations contract
         })
     
         console.log("transactionConfig: ", transactionConfig)
@@ -233,7 +233,7 @@ function getNUBConfig(config: Web3 | NUBConfig): NUBConfig {
     if (config.mode === 'node') {
       if (!config.privateKey) throw new Error(`Property 'privateKey' is not defined in config.`)
   
-      const privateKey = config.privateKey.slice(0, 2) != '0x' ? '0x' + config.privateKey : config.privateKey
+      const privateKey = config.privateKey.slice(0, 2) !== '0x' ? '0x' + config.privateKey : config.privateKey
   
       return {
         web3: config.web3,
@@ -249,7 +249,7 @@ function getNUBConfig(config: Web3 | NUBConfig): NUBConfig {
       return {
         web3: config.web3,
         mode: 'simulation',
-        publicKey: publicKey,
+        publicKey,
       }
     } else if (!config.mode || config.mode === 'browser') {
       return {

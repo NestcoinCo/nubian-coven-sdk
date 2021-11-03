@@ -11,12 +11,12 @@ export class Transaction {
    */
   send = async (transactionConfig: TransactionConfig): Promise<string> => {
     return new Promise(async (resolve, reject) => {
-      if (transactionConfig.to == Addresses.genesis)
+      if (transactionConfig.to === Addresses.genesis)
         throw Error(
           `Please ensure that the implementations contract address has been set and is valid`
         )
 
-      if (this.nub.config.mode == 'node') {
+      if (this.nub.config.mode === 'node') {
         const signedTransaction = await this.nub.web3.eth.accounts.signTransaction(
           transactionConfig,
           this.nub.config.privateKey
@@ -94,7 +94,7 @@ export class Transaction {
       to: transaction.to ?? undefined,
       value: transaction.value,
       data: transaction.input,
-      gasPrice: gasPrice,
+      gasPrice,
       gas: transaction.gas,
       nonce: transaction.nonce,
     }

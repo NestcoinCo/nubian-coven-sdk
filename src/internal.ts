@@ -84,7 +84,7 @@ export class Internal {
    * Returns the ABI interface for any NUB contract.
    */
   getInterface = (abiItems: AbiItem[], method: string) => {
-    const abiItem = abiItems.find((abiItem) => abiItem.name === method)
+    const abiItem = abiItems.find((_item) => _item.name === method)
 
     if (!abiItem) {
       console.error(`${method} is an invalid method.`)
@@ -124,7 +124,7 @@ export class Internal {
    * @param params.spells the spells instance
    */
   encodeSpells = (params: Spells | { spells: Spells }, version: Version = this.nub.VERSION) => {
-    let spells = this.nub.castHelpers.flashBorrowSpellsConvert(this.getSpells(params))
+    const spells = this.nub.castHelpers.flashBorrowSpellsConvert(this.getSpells(params))
     console.log("Spells: ", spells)
     // Convert the spell.connector into required version. Eg: compound => COMPOUND-A for NUBv2
     spells.data = spells.data.map(spell => Number(version) === 1 ?
@@ -170,10 +170,10 @@ export class Internal {
    * Returns the input interface required for cast().
    */
   getAddress = async () => {
-    if (this.nub.config.mode == "node")
+    if (this.nub.config.mode === "node")
       return this.nub.web3.eth.accounts.privateKeyToAccount(this.nub.config.privateKey)
         .address;
-    else if (this.nub.config.mode == "simulation") 
+    else if (this.nub.config.mode === "simulation") 
       return this.nub.config.publicKey
 
     // otherwise, browser
@@ -191,7 +191,7 @@ export class Internal {
    * Returns the address from token key OR checksum the address if not.
    */
   filterAddress = (token: keyof typeof TokenInfo | string) => {
-    var isAddress = this.nub.web3.utils.isAddress(token.toLowerCase())
+    const isAddress = this.nub.web3.utils.isAddress(token.toLowerCase())
     if (isAddress) {
       return this.nub.web3.utils.toChecksumAddress(token.toLowerCase())
     } else {
@@ -219,7 +219,7 @@ export class Internal {
       const estimatedGas = await this.nub.web3.eth.estimateGas({
         from: params.from,
         to: params.to,
-        data: data,
+        data,
         value: params.value,
       })
 

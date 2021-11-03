@@ -93,7 +93,7 @@ type Erc20InputParams = {
       txObj = await this.nub.internal.getTransactionConfig({
         from: params.from,
         to: params.to,
-        data: data,
+        data,
         gas: params.gas,
         gasPrice: params.gasPrice,
         nonce: params.nonce,
@@ -139,7 +139,7 @@ type Erc20InputParams = {
        txObj = await this.nub.internal.getTransactionConfig({
         from: params.from,
         to: params.to,
-        data: data,
+        data,
         gas: params.gas,
         gasPrice: params.gasPrice,
         nonce: params.nonce,
