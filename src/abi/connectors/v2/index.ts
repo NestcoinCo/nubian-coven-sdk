@@ -8,7 +8,7 @@ import {NubianStaking} from './NubianStaking'
 
 
 
-export const connectorsV2_M1 =  {
+export const CONNECTORS_V2_M1 =  {
     "AUTHORITY-A": AUTHORITY_A,
     "BASIC-A": BASIC_A,
     "PancakeV2": PancakeV2,

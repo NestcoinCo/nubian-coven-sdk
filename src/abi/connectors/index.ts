@@ -1,11 +1,11 @@
-export * as connectorsV2_M1 from './v2'
+export * as CONNECTORS_V2_M1 from './v2'
 
-import { connectorsV2_M1 } from './v2'
+import { CONNECTORS_V2_M1 } from './v2'
 
-export type Connector = keyof typeof connectorsV2_M1 
+export type Connector = keyof typeof CONNECTORS_V2_M1 
 
 export const connectors = {
     versions: {
-        2: connectorsV2_M1
+        2: CONNECTORS_V2_M1
     }
 }
