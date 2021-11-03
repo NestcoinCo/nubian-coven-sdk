@@ -37,7 +37,6 @@ export class CastHelpers {
       from = fromFetch ? fromFetch : ""
     }
 
-    console.log("From Address is ", from)
 
     const value = params.value ?? '0'
 

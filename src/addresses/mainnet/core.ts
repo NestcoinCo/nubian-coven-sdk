@@ -5,8 +5,8 @@ export const core = {
   versions: {
     2: {
       accountProxy: '0x2FB5B6b3632146EEAD26446046C8A45c36485436', //  NubianAccountV2
-      accountDefault: '0x132c190D30bCaE57e15171aC0cA71e430D391874', //NubianDefaultImplementation
-      implementations: '0x5DDa94995d64fB239F7dE2971E90a36524605b52', //NubianImplementations
+      accountDefault: '0x132c190D30bCaE57e15171aC0cA71e430D391874', // NubianDefaultImplementation
+      implementations: '0x5DDa94995d64fB239F7dE2971E90a36524605b52', // NubianImplementations
       account: '0xd29aFdfBCad1C249b0c69Eb2785b08353029282B', // NubianImplementationM1
       connectors: '0x21cf3ea572473f22597DE28c80cA6BFF94416151', // NubianConnector v2 (default)
     },
