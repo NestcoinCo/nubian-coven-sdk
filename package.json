@@ -1,7 +1,7 @@
 {
-  "name": "nubian-wizard-sdk",
+  "name": "nubian-coven-sdk",
   "version": "1.0.2",
-  "description": "sdk for connecting Nubian Wizard Contracts. ",
+  "description": "sdk for connecting Nubian Coven Contracts. ",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
