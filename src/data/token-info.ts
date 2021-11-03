@@ -40,5 +40,5 @@ export const TokenInfo = {
     name: 'Pancakeswap Token',
     address: '0x8ed39e59daf86cd1b598ac5cc363da896660b35d',
     decimals: 18,
-  }
-}
+  },
+};

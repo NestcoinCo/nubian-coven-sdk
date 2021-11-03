@@ -1,14 +1,14 @@
-import { TransactionConfig } from 'web3-core'
-import NUB from '.'
-import { Abi } from './abi'
-import { Addresses } from './addresses'
-import { Spells } from './spells'
-import { wrapIfSpells } from './utils'
+import { TransactionConfig } from 'web3-core';
+import NUB from '.';
+import { Abi } from './abi';
+import { Addresses } from './addresses';
+import { Spells } from './spells';
+import { wrapIfSpells } from './utils';
 
 type EncodeAbiParams = {
-  spells: Spells
-  origin?: string
-} & Pick<TransactionConfig, 'to'>
+  spells: Spells;
+  origin?: string;
+} & Pick<TransactionConfig, 'to'>;
 
 export class CastHelpers {
   constructor(private nub: NUB) {}
@@ -22,32 +22,32 @@ export class CastHelpers {
    * @param params.spells cast spells
    */
   estimateGas = async (params: { spells: Spells } & Pick<TransactionConfig, 'from' | 'to' | 'value'>) => {
-    const to = params.to ?? ""
+    const to = params.to ?? '';
 
     if (to === Addresses.genesis)
-      throw new Error(
-        `Please verify that the address of the implementation contract has been set and is valid`
-      )
+      throw new Error(`Please verify that the address of the implementation contract has been set and is valid`);
 
-    const { targets, spells } = this.nub.internal.encodeSpells(params)
-    const args = [targets, spells, this.nub.origin]
-    let from = params.from
+    const { targets, spells } = this.nub.internal.encodeSpells(params);
+    const args = [targets, spells, this.nub.origin];
+    let from = params.from;
     if (!from) {
-      const fromFetch = await this.nub.internal.getAddress()
-      from = fromFetch ? fromFetch : ""
+      const fromFetch = await this.nub.internal.getAddress();
+      from = fromFetch ? fromFetch : '';
     }
 
+    const value = params.value ?? '0';
 
-    const value = params.value ?? '0'
+    const abi = this.nub.internal.getInterface(
+      Abi.core.versions[this.nub.VERSION].implementations.implementations,
+      'cast',
+    );
 
-    const abi = this.nub.internal.getInterface(Abi.core.versions[this.nub.VERSION].implementations.implementations, 'cast')
+    if (!abi) throw new Error('Abi is not defined.');
 
-    if (!abi) throw new Error('Abi is not defined.')
+    const estimatedGas = await this.nub.internal.estimateGas({ abi, to, from, value, args });
 
-    const estimatedGas = await this.nub.internal.estimateGas({ abi, to, from, value, args })
-
-    return estimatedGas
-  }
+    return estimatedGas;
+  };
 
   /**
    * Returns the encoded cast ABI byte code to send via a transaction or call.
@@ -57,38 +57,35 @@ export class CastHelpers {
    * @param params.origin (optional) the transaction origin source
    */
   encodeABI = (params: Spells | EncodeAbiParams) => {
-    console.log("Encode ABI", params)
+    console.log('Encode ABI', params);
     const defaults = {
       to: Addresses.core[this.nub.CHAIN_ID].versions[this.nub.VERSION].implementations,
       origin: this.nub.origin,
-    }
+    };
 
-    const mergedParams = Object.assign(defaults, wrapIfSpells(params)) as EncodeAbiParams
+    const mergedParams = Object.assign(defaults, wrapIfSpells(params)) as EncodeAbiParams;
 
-    if (mergedParams.to === Addresses.genesis)
-      throw new Error(
-        `Please specify the address of the Wizard Contract`
-      )
+    if (mergedParams.to === Addresses.genesis) throw new Error(`Please specify the address of the Wizard Contract`);
 
     const contract = new this.nub.config.web3.eth.Contract(
       Abi.core.versions[this.nub.VERSION].implementations.implementations,
-      mergedParams.to
-    )
+      mergedParams.to,
+    );
 
-    const { targets, spells } = this.nub.internal.encodeSpells(mergedParams.spells)
+    const { targets, spells } = this.nub.internal.encodeSpells(mergedParams.spells);
 
-    const encodedAbi: string = contract.methods.cast(targets, spells, mergedParams.origin).encodeABI()
-    return encodedAbi
-  }
+    const encodedAbi: string = contract.methods.cast(targets, spells, mergedParams.origin).encodeABI();
+    return encodedAbi;
+  };
 
   flashBorrowSpellsConvert = (params: Spells): Spells => {
-    const arr = params.data
-    const spellsLength = arr.length
-    const spells = this.nub.Spell()
+    const arr = params.data;
+    const spellsLength = arr.length;
+    const spells = this.nub.Spell();
     for (let i = 0; i < spellsLength; i++) {
-      const a = arr[i]
-      spells.add(a)
+      const a = arr[i];
+      spells.add(a);
     }
-    return spells
-  }
+    return spells;
+  };
 }

@@ -1,4 +1,4 @@
-import { AbiItem } from 'web3-utils'
+import { AbiItem } from 'web3-utils';
 
 export const erc20: AbiItem[] = [
   {
@@ -221,4 +221,4 @@ export const erc20: AbiItem[] = [
     name: 'Transfer',
     type: 'event',
   },
-]
+];

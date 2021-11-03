@@ -1,1 +1,1 @@
-export * from '../core/read'
+export * from '../core/read';

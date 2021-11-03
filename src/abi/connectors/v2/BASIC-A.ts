@@ -1,4 +1,4 @@
-import { AbiItem } from 'web3-utils'
+import { AbiItem } from 'web3-utils';
 
 export const BASIC_A: AbiItem[] = [
   {
@@ -132,4 +132,4 @@ export const BASIC_A: AbiItem[] = [
     stateMutability: 'payable',
     type: 'function',
   },
-]
+];

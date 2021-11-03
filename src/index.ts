@@ -1,2 +1,2 @@
-import { NUB } from './nub'
+import { NUB } from './nub';
 export default NUB;

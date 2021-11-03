@@ -1,4 +1,4 @@
-import { AbiItem } from 'web3-utils'
+import { AbiItem } from 'web3-utils';
 
 export const read: AbiItem[] = [
   {
@@ -277,4 +277,4 @@ export const read: AbiItem[] = [
     stateMutability: 'view',
     type: 'function',
   },
-]
+];

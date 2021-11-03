@@ -1,4 +1,4 @@
-import { AbiItem } from 'web3-utils'
+import { AbiItem } from 'web3-utils';
 
 export const VenusV2: AbiItem[] = [
   {
@@ -804,4 +804,4 @@ export const VenusV2: AbiItem[] = [
     stateMutability: 'view',
     type: 'function',
   },
-]
+];

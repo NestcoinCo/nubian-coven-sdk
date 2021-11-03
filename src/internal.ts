@@ -1,32 +1,32 @@
-import { TransactionConfig } from 'web3-core'
-import { AbiItem } from 'web3-utils'
-import NUB from '.'
-import { Abi } from './abi'
-import { Connector } from "./abi/connectors";
-import { Addresses } from './addresses'
-import { TokenInfo } from './data/token-info'
-import { EstimatedGasException } from './exceptions/estimated-gas-exception'
-import { Spells } from './spells'
-import { hasKey } from './utils/typeHelper'
-import connectorV2Mapping from "./data/connectorsV2_M1_mapping";
+import { TransactionConfig } from 'web3-core';
+import { AbiItem } from 'web3-utils';
+import NUB from '.';
+import { Abi } from './abi';
+import { Connector } from './abi/connectors';
+import { Addresses } from './addresses';
+import { TokenInfo } from './data/token-info';
+import { EstimatedGasException } from './exceptions/estimated-gas-exception';
+import { Spells } from './spells';
+import { hasKey } from './utils/typeHelper';
+import connectorV2Mapping from './data/connectorsV2_M1_mapping';
 
 export interface GetTransactionConfigParams {
-  from: NonNullable<TransactionConfig['from']>
-  to: NonNullable<TransactionConfig['to']>
-  data: NonNullable<TransactionConfig['data']>
-  value?: TransactionConfig['value']
-  gas?: TransactionConfig['gas']
-  gasPrice?: TransactionConfig['gasPrice']
-  nonce?: TransactionConfig['nonce']
+  from: NonNullable<TransactionConfig['from']>;
+  to: NonNullable<TransactionConfig['to']>;
+  data: NonNullable<TransactionConfig['data']>;
+  value?: TransactionConfig['value'];
+  gas?: TransactionConfig['gas'];
+  gasPrice?: TransactionConfig['gasPrice'];
+  nonce?: TransactionConfig['nonce'];
 }
 
-export type Version = keyof typeof Abi.connectors.versions
+export type Version = keyof typeof Abi.connectors.versions;
 export { Connector } from './abi/connectors';
 
 export type EstimateGasParams = {
-  abi: AbiItem
-  args: any
-} & Required<Pick<TransactionConfig, 'from' | 'to' | 'value'>>
+  abi: AbiItem;
+  args: any;
+} & Required<Pick<TransactionConfig, 'from' | 'to' | 'value'>>;
 
 export class Internal {
   constructor(private nub: NUB) {}
@@ -47,74 +47,75 @@ export class Internal {
    * @param params.nonce (optional) mostly for "node" mode
    */
   getTransactionConfig = async (params: GetTransactionConfigParams) => {
-    if (!params.from) throw new Error("Parameter 'from' is not defined.")
-    if (!params.to) throw new Error("Parameter 'to' is not defined.")
-    if (!params.data) throw new Error("Parameter 'data' is not defined.")
+    if (!params.from) throw new Error("Parameter 'from' is not defined.");
+    if (!params.to) throw new Error("Parameter 'to' is not defined.");
+    if (!params.data) throw new Error("Parameter 'data' is not defined.");
 
-    const from = params.from
-    const to = params.to
-    const data = params.data !== '0x' ? params.data : '0x'
-    const value = params.value ?? 0
-    const gas = params.gas ?? (await this.getGas({ from, to, data, value }))
+    const from = params.from;
+    const to = params.to;
+    const data = params.data !== '0x' ? params.data : '0x';
+    const value = params.value ?? 0;
+    const gas = params.gas ?? (await this.getGas({ from, to, data, value }));
 
-    const transactionConfig: TransactionConfig = { from, to, data, value, gas }
+    const transactionConfig: TransactionConfig = { from, to, data, value, gas };
 
     if (params.gasPrice) {
-      transactionConfig.gasPrice = params.gasPrice
+      transactionConfig.gasPrice = params.gasPrice;
     }
 
     if (this.nub.mode === 'node') {
-      if (!params.gasPrice) throw new Error("Parameter 'gasPrice' must be defined when using mode 'node'.")
+      if (!params.gasPrice) throw new Error("Parameter 'gasPrice' must be defined when using mode 'node'.");
 
-      transactionConfig.nonce = params.nonce ?? (await this.getNonce(from))
+      transactionConfig.nonce = params.nonce ?? (await this.getNonce(from));
     }
 
-    return transactionConfig
-  }
+    return transactionConfig;
+  };
 
   private getNonce = async (from: string | number) => {
-    return await this.nub.web3.eth.getTransactionCount(String(from))
-  }
+    return await this.nub.web3.eth.getTransactionCount(String(from));
+  };
 
   private getGas = async (transactionConfig: TransactionConfig) => {
-    return ((await this.nub.web3.eth.estimateGas(transactionConfig)) * 1.1).toFixed(0) // increasing gas cost by 10% for margin
-  }
+    return ((await this.nub.web3.eth.estimateGas(transactionConfig)) * 1.1).toFixed(0); // increasing gas cost by 10% for margin
+  };
 
   /**
    * Returns the ABI interface for any NUB contract.
    */
   getInterface = (abiItems: AbiItem[], method: string) => {
-    const abiItem = abiItems.find((_item) => _item.name === method)
+    const abiItem = abiItems.find((_item) => _item.name === method);
 
     if (!abiItem) {
-      console.error(`${method} is an invalid method.`)
-      return
+      console.error(`${method} is an invalid method.`);
+      return;
     }
 
-    return abiItem
-  }
+    return abiItem;
+  };
 
   /**
    * Returns encoded data of any calls.
    */
-  encodeMethod = (params: { connector: Connector; method: string; args: string[]}, version: Version = this.nub.VERSION) => {
-
-    console.log("Params", params);
+  encodeMethod = (
+    params: { connector: Connector; method: string; args: string[] },
+    version: Version = this.nub.VERSION,
+  ) => {
+    console.log('Params', params);
 
     // type check that object has the required properties
     if (!(hasKey(Abi.connectors.versions, version) && hasKey(Abi.connectors.versions[version], params.connector))) {
-      throw new Error(`ConnectorInterface '${params.method}' not found`)
+      throw new Error(`ConnectorInterface '${params.method}' not found`);
     }
 
     // Abi.connectors.versions[version]
-    const connectorInterface = this.getInterface(Abi.connectors.versions[version][params.connector], params.method)
+    const connectorInterface = this.getInterface(Abi.connectors.versions[version][params.connector], params.method);
 
-    console.log("Interface", connectorInterface);
+    console.log('Interface', connectorInterface);
 
-
-    if (!connectorInterface) throw new Error(`ConnectorInterface '${params.method}' not found`)
-    return this.nub.web3.eth.abi.encodeFunctionCall(connectorInterface, params.args)
-  }
+    if (!connectorInterface) throw new Error(`ConnectorInterface '${params.method}' not found`);
+    return this.nub.web3.eth.abi.encodeFunctionCall(connectorInterface, params.args);
+  };
 
   /**
    * Returns encoded data of spells (used via cast() mostly).
@@ -124,25 +125,26 @@ export class Internal {
    * @param params.spells the spells instance
    */
   encodeSpells = (params: Spells | { spells: Spells }, version: Version = this.nub.VERSION) => {
-    const spells = this.nub.castHelpers.flashBorrowSpellsConvert(this.getSpells(params))
-    console.log("Spells: ", spells)
+    const spells = this.nub.castHelpers.flashBorrowSpellsConvert(this.getSpells(params));
+    console.log('Spells: ', spells);
     // Convert the spell.connector into required version. Eg: compound => COMPOUND-A for NUBv2
-    spells.data = spells.data.map(spell => Number(version) === 1 ?
-      {...spell, connector: spell.connector} :
-      hasKey(connectorV2Mapping, spell.connector) ? 
-        {...spell, connector: connectorV2Mapping[spell.connector] as Connector} :
-        {...spell, connector: spell.connector}
-    )
-    
-    const targets = spells.data.map((spell) => this.getTarget(spell.connector, version))
-    const encodedMethods = spells.data.map((spell) => this.encodeMethod(spell, version))
+    spells.data = spells.data.map((spell) =>
+      Number(version) === 1
+        ? { ...spell, connector: spell.connector }
+        : hasKey(connectorV2Mapping, spell.connector)
+        ? { ...spell, connector: connectorV2Mapping[spell.connector] as Connector }
+        : { ...spell, connector: spell.connector },
+    );
 
-    return { targets, spells: encodedMethods }
-  }
+    const targets = spells.data.map((spell) => this.getTarget(spell.connector, version));
+    const encodedMethods = spells.data.map((spell) => this.encodeMethod(spell, version));
+
+    return { targets, spells: encodedMethods };
+  };
 
   private getSpells = (params: Spells | { spells: Spells }) => {
-    return params instanceof Spells ? params : params.spells
-  }
+    return params instanceof Spells ? params : params.spells;
+  };
 
   /**
    * Returns the input interface required for cast().
@@ -152,56 +154,56 @@ export class Internal {
 
     // type check that object has the required properties
     if (
-      !(hasKey(Addresses.connectors.chains[chainId].versions, version) && 
-      hasKey(Addresses.connectors.chains[chainId].versions[version], connector))
+      !(
+        hasKey(Addresses.connectors.chains[chainId].versions, version) &&
+        hasKey(Addresses.connectors.chains[chainId].versions[version], connector)
+      )
     ) {
-      return console.error(`${connector} is invalid connector.`)
-    } 
+      return console.error(`${connector} is invalid connector.`);
+    }
 
-    const target = Addresses.connectors.chains[chainId].versions[version][connector]
+    const target = Addresses.connectors.chains[chainId].versions[version][connector];
 
-    if (!target) return console.error(`${connector} is invalid connector.`)
+    if (!target) return console.error(`${connector} is invalid connector.`);
 
     // return target address for version 1 and connector name for version 2
     return connector;
-  }
+  };
 
   /**
    * Returns the input interface required for cast().
    */
   getAddress = async () => {
-    if (this.nub.config.mode === "node")
-      return this.nub.web3.eth.accounts.privateKeyToAccount(this.nub.config.privateKey)
-        .address;
-    else if (this.nub.config.mode === "simulation") 
-      return this.nub.config.publicKey
+    if (this.nub.config.mode === 'node')
+      return this.nub.web3.eth.accounts.privateKeyToAccount(this.nub.config.privateKey).address;
+    else if (this.nub.config.mode === 'simulation') return this.nub.config.publicKey;
 
     // otherwise, browser
-    const addresses = await this.nub.web3.eth.getAccounts()
+    const addresses = await this.nub.web3.eth.getAccounts();
 
     if (!addresses.length) {
-      console.log('No ethereum address detected.')
-      return
+      console.log('No ethereum address detected.');
+      return;
     }
 
-    return addresses[0]
-  }
+    return addresses[0];
+  };
 
   /**
    * Returns the address from token key OR checksum the address if not.
    */
   filterAddress = (token: keyof typeof TokenInfo | string) => {
-    const isAddress = this.nub.web3.utils.isAddress(token.toLowerCase())
+    const isAddress = this.nub.web3.utils.isAddress(token.toLowerCase());
     if (isAddress) {
-      return this.nub.web3.utils.toChecksumAddress(token.toLowerCase())
+      return this.nub.web3.utils.toChecksumAddress(token.toLowerCase());
     } else {
-      const info = TokenInfo[token as keyof typeof TokenInfo]
+      const info = TokenInfo[token as keyof typeof TokenInfo];
 
-      if (!info) throw new Error("'token' symbol not found.")
+      if (!info) throw new Error("'token' symbol not found.");
 
-      return this.nub.web3.utils.toChecksumAddress(info.address)
+      return this.nub.web3.utils.toChecksumAddress(info.address);
     }
-  }
+  };
 
   /**
    * Returns the estimated gas cost.
@@ -213,7 +215,7 @@ export class Internal {
    * @param params.value the call ETH value
    */
   estimateGas = async (params: EstimateGasParams) => {
-    const data = this.nub.web3.eth.abi.encodeFunctionCall(params.abi, params.args)
+    const data = this.nub.web3.eth.abi.encodeFunctionCall(params.abi, params.args);
 
     try {
       const estimatedGas = await this.nub.web3.eth.estimateGas({
@@ -221,11 +223,11 @@ export class Internal {
         to: params.to,
         data,
         value: params.value,
-      })
+      });
 
-      return estimatedGas
-    } catch (error : any) {
-      throw new EstimatedGasException(error, { ...params, data })
+      return estimatedGas;
+    } catch (error: any) {
+      throw new EstimatedGasException(error, { ...params, data });
     }
-  }
+  };
 }

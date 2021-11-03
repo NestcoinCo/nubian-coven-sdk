@@ -11,4 +11,4 @@ export const core = {
       connectors: '0x21cf3ea572473f22597DE28c80cA6BFF94416151', // NubianConnector v2 (default)
     },
   },
-}
+};

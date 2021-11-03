@@ -1,4 +1,4 @@
-import { AbiItem } from 'web3-utils'
+import { AbiItem } from 'web3-utils';
 
 export const AUTHORITY_A: AbiItem[] = [
   {
@@ -96,4 +96,4 @@ export const AUTHORITY_A: AbiItem[] = [
     stateMutability: 'payable',
     type: 'function',
   },
-]
+];
