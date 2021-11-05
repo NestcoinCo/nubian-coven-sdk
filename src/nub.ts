@@ -182,8 +182,8 @@ export class NUB {
     const encodedSpells = this.internal.encodeSpells(params);
 
     const contract = new this.web3.eth.Contract(
-      Abi.core.versions[2].implementations.implementations,
-      Addresses.core[56].index,
+      Abi.core.versions[this.VERSION].implementations.implementations,
+      Addresses.core[this.CHAIN_ID].versions[this.VERSION].implementations,
     );
     const data = contract.methods
       .cast(encodedSpells.targets, encodedSpells.spells, params.origin || Addresses.genesis)
