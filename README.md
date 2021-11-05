@@ -136,13 +136,25 @@ Here are the optional parameters.
 
 This will send the transaction to blockchain in node implementation (or ask users to confirm the transaction on web3 wallets like Metamask).
 
-## Transactions
+## Transaction History
 
 You can see the list of transactions by an address:
 ```js
 nub.getAccountTransactions("0x00");
 ```
 Replace `0x0` with the address of the EOA.
+
+## Eth and token Transfer
+
+You can transfer tokens using the transferToken function.
+```js
+nub.transferToken(_tokenAddress, _recipient, _amount);
+```
+
+for Eth transfers, make use of the transferEth function.
+```js
+nub.transferEth(_recipient, _amount);
+```
 
 
 ## Connectors

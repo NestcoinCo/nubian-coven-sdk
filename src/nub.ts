@@ -178,6 +178,22 @@ export class NUB {
     return transaction;
   }
 
+  public async transferToken(tokenAddress: string, receiver: string, amount: number){
+    const contract = new this.web3.eth.Contract(
+      Abi.basics.erc20,
+      tokenAddress,
+    );
+    let resp = await contract.methods.transfer(receiver, amount).send();
+    return resp;
+  }
+
+  public async transferEth(receiver: string, amount: number)
+  {
+    const sender = await this.internal.getAddress();
+    let resp = await this.web3.eth.sendTransaction({ from:sender,to:receiver, value:amount });
+    return resp;
+  }
+
   private async getData(params: { spells: Spells; origin?: string }) {
     const encodedSpells = this.internal.encodeSpells(params);
 
