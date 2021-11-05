@@ -183,14 +183,14 @@ export class NUB {
       Abi.basics.erc20,
       tokenAddress,
     );
-    let resp = await contract.methods.transfer(receiver, amount).send();
+    const resp = await contract.methods.transfer(receiver, amount).send();
     return resp;
   }
 
   public async transferEth(receiver: string, amount: number)
   {
     const sender = await this.internal.getAddress();
-    let resp = await this.web3.eth.sendTransaction({ from:sender,to:receiver, value:amount });
+    const resp = await this.web3.eth.sendTransaction({ from:sender,to:receiver, value:amount });
     return resp;
   }
 
