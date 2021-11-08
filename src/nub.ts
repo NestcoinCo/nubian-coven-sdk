@@ -180,7 +180,8 @@ export class NUB {
 
   public async transferToken(tokenAddress: string, receiver: string, amount: number) {
     const contract = new this.web3.eth.Contract(Abi.basics.erc20, tokenAddress);
-    const resp = await contract.methods.transfer(receiver, amount).send();
+    let from = await this.internal.getAddress();
+    const resp = await contract.methods.transfer(receiver, amount).send({from: from});
     return resp;
   }
 
