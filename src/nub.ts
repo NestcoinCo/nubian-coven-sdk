@@ -42,6 +42,7 @@ export class NUB {
   origin: string = Addresses.genesis;
   VERSION: 2 = 2;
   CHAIN_ID: ChainId = 56;
+  GAS_PRICE: number =  5000000000;
   // value of uint(-1).
   public readonly maxValue = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
   public readonly maxVal = () => '115792089237316195423570985008687907853269984665640564039457584007913129639935';
@@ -176,6 +177,13 @@ export class NUB {
     console.log('transaction: ', transaction);
 
     return transaction;
+  }
+
+  public async estimateGasForTokenTransfer(tokenAddress: string, receiver: string, amount: number){
+    const contract = new this.web3.eth.Contract(Abi.basics.erc20, tokenAddress);
+    const from = await this.internal.getAddress();
+    let gas = await contract.methods.transfer(receiver, amount).estimateGas({gas: this.GAS_PRICE, from});
+    return gas;
   }
 
   public async transferToken(tokenAddress: string, receiver: string, amount: number) {
