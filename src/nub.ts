@@ -45,7 +45,6 @@ export class NUB {
   GAS_PRICE: number = 5000000000;
   // value of uint(-1).
   public readonly maxValue = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
-  public readonly maxVal = () => '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 
   readonly config: NUBConfig;
   readonly castHelpers = new CastHelpers(this);
@@ -177,6 +176,20 @@ export class NUB {
     console.log('transaction: ', transaction);
 
     return transaction;
+  }
+
+  public async appprove(tokenAddress: string, amount: string){
+    const contract = new this.web3.eth.Contract(Abi.basics.erc20, tokenAddress);
+    const from = await this.internal.getAddress();
+    const resp = await contract.methods.appprove(Addresses.core[this.CHAIN_ID].versions[this.VERSION].implementations, amount).send({ from });
+    return resp;
+  }
+
+  public async infiniteApprove(tokenAddress: string){
+    const contract = new this.web3.eth.Contract(Abi.basics.erc20, tokenAddress);
+    const from = await this.internal.getAddress();
+    const resp = await contract.methods.appprove(Addresses.core[this.CHAIN_ID].versions[this.VERSION].implementations, this.maxValue).send({ from });
+    return resp;
   }
 
   public async estimateGasForTokenTransfer(tokenAddress: string, receiver: string, amount: number) {

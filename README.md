@@ -156,6 +156,18 @@ for Eth transfers, make use of the transferEth function.
 nub.transferEth(_recipient, _amount);
 ```
 
+## Approval
+
+You can approve the wizard contract to spend tokens on behalf of the user by calling the approve or infiniteApprove functions. 
+```js
+nub.infiniteApprove(_tokenAddress);
+```
+
+```js
+nub.approve(_tokenAddress, _amount);
+```
+
+
 
 ## Connectors
 
