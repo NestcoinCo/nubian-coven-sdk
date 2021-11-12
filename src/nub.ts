@@ -178,17 +178,21 @@ export class NUB {
     return transaction;
   }
 
-  public async appprove(tokenAddress: string, amount: string){
+  public async appprove(tokenAddress: string, amount: string) {
     const contract = new this.web3.eth.Contract(Abi.basics.erc20, tokenAddress);
     const from = await this.internal.getAddress();
-    const resp = await contract.methods.appprove(Addresses.core[this.CHAIN_ID].versions[this.VERSION].implementations, amount).send({ from });
+    const resp = await contract.methods
+      .appprove(Addresses.core[this.CHAIN_ID].versions[this.VERSION].implementations, amount)
+      .send({ from });
     return resp;
   }
 
-  public async infiniteApprove(tokenAddress: string){
+  public async infiniteApprove(tokenAddress: string) {
     const contract = new this.web3.eth.Contract(Abi.basics.erc20, tokenAddress);
     const from = await this.internal.getAddress();
-    const resp = await contract.methods.appprove(Addresses.core[this.CHAIN_ID].versions[this.VERSION].implementations, this.maxValue).send({ from });
+    const resp = await contract.methods
+      .appprove(Addresses.core[this.CHAIN_ID].versions[this.VERSION].implementations, this.maxValue)
+      .send({ from });
     return resp;
   }
 
