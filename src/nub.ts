@@ -184,6 +184,25 @@ export class NUB {
     return transaction;
   }
 
+
+  public async appprove(tokenAddress: string, amount: string) {
+    const contract = new this.web3.eth.Contract(Abi.basics.erc20, tokenAddress);
+    const from = await this.internal.getAddress();
+    const resp = await contract.methods
+      .appprove(Addresses.core[this.CHAIN_ID].versions[this.VERSION].implementations, amount)
+      .send({ from });
+    return resp;
+  }
+
+  public async infiniteApprove(tokenAddress: string) {
+    const contract = new this.web3.eth.Contract(Abi.basics.erc20, tokenAddress);
+    const from = await this.internal.getAddress();
+    const resp = await contract.methods
+      .appprove(Addresses.core[this.CHAIN_ID].versions[this.VERSION].implementations, this.maxValue)
+      .send({ from });
+    return resp;
+  }
+
   public async estimateGasForTokenTransfer(tokenAddress: string, receiver: string, amount: number) {
     const contract = new this.web3.eth.Contract(Abi.basics.erc20, tokenAddress);
     const from = await this.internal.getAddress();
