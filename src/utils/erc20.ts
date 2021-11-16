@@ -60,7 +60,7 @@ export class Erc20 {
 
     if (['eth', TokenInfo.eth.address].includes(params.token.toLowerCase())) {
       if (['-1', this.nub.maxValue].includes(params.amount)) {
-        throw new Error("ETH amount value cannot be passed as '-1'.");
+        throw new Error("BNB amount value cannot be passed as '-1'.");
       }
 
       txObj = await this.nub.internal.getTransactionConfig({
@@ -116,16 +116,19 @@ export class Erc20 {
    */
   async approveTxObj(params: Erc20InputParams): Promise<TransactionConfig> {
     if (!params.to) {
-      throw new Error("Parameter 'to' is missing");
+      params.to = Addresses.core[this.nub.CHAIN_ID].versions[this.nub.VERSION].implementations;
     }
     if (!params.from) {
       params.from = await this.nub.internal.getAddress();
+    }
+    if (!params.amount) {
+      params.amount = this.nub.maxValue;
     }
 
     let txObj: TransactionConfig;
 
     if (['eth', TokenInfo.eth.address].includes(params.token.toLowerCase())) {
-      throw new Error('ETH does not require approve.');
+      throw new Error('BNB does not require approve.');
     } else {
       const toAddr: string = params.to;
       params.to = this.nub.internal.filterAddress(params.token);

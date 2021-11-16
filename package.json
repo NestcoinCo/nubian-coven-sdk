@@ -39,6 +39,8 @@
   "homepage": "https://github.com/NestcoinCo/nubian-coven-sdk#readme",
   "devDependencies": {
     "@types/jest": "^27.0.2",
+    "@types/node": "^16.11.7",
+    "dotenv": "^10.0.0",
     "jest": "^27.3.1",
     "prettier": "^2.4.1",
     "ts-jest": "^27.0.7",
@@ -50,6 +52,7 @@
     "lib/**/*"
   ],
   "dependencies": {
+    "axios": "^0.24.0",
     "web3": "^1.6.0"
   }
 }
