@@ -12,7 +12,7 @@ import { Addresses } from './addresses';
 import { Internal, Version } from './internal';
 import { Spells } from './spells';
 import { Transaction } from './transaction';
-import { wrapIfSpells, PancakeV2, ETH} from './utils';
+import { wrapIfSpells, PancakeV2, ETH } from './utils';
 import { Erc20 } from './utils/erc20';
 
 type NUBConfig =
@@ -184,7 +184,6 @@ export class NUB {
     return transaction;
   }
 
-
   public async appprove(tokenAddress: string, amount: string) {
     const contract = new this.web3.eth.Contract(Abi.basics.erc20, tokenAddress);
     const from = await this.internal.getAddress();
@@ -237,7 +236,7 @@ export class NUB {
     return data;
   }
 
-  private async getContractData(method:any, ...params: any[] ) {
+  private async getContractData(method: any, ...params: any[]) {
     const data = method(...params).encodeABI();
     return data;
   }

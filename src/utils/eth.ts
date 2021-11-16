@@ -56,19 +56,19 @@ export class ETH {
     }
 
     let txObj: TransactionConfig;
-      if (['-1', this.nub.maxValue].includes(params.amount)) {
-        throw new Error("BNB amount cannot be passed as '-1'.");
-      }
+    if (['-1', this.nub.maxValue].includes(params.amount)) {
+      throw new Error("BNB amount cannot be passed as '-1'.");
+    }
 
-      txObj = await this.nub.internal.getTransactionConfig({
-        from: params.from,
-        to: params.to,
-        data: '0x',
-        gas: params.gas,
-        gasPrice: params.gasPrice,
-        nonce: params.nonce,
-        value: params.amount,
-      } as GetTransactionConfigParams);
+    txObj = await this.nub.internal.getTransactionConfig({
+      from: params.from,
+      to: params.to,
+      data: '0x',
+      gas: params.gas,
+      gasPrice: params.gasPrice,
+      nonce: params.nonce,
+      value: params.amount,
+    } as GetTransactionConfigParams);
 
     return txObj;
   }
