@@ -12,7 +12,7 @@ import { Addresses } from './addresses';
 import { Internal, Version } from './internal';
 import { Spells } from './spells';
 import { Transaction } from './transaction';
-import { wrapIfSpells } from './utils';
+import { wrapIfSpells, PancakeV2, ETH} from './utils';
 import { Erc20 } from './utils/erc20';
 
 type NUBConfig =
@@ -56,6 +56,9 @@ export class NUB {
   public estimateCastGas = (...args: Parameters<CastHelpers['estimateGas']>) => {
     return this.castHelpers.estimateGas(...args);
   };
+  public erc20;
+  public pancakeswap;
+  public eth;
 
   get web3() {
     return this.config.web3;
@@ -85,6 +88,9 @@ export class NUB {
         this.CHAIN_ID = _chainId as ChainId;
       }
     });
+    this.erc20 = new Erc20(this);
+    this.pancakeswap = new PancakeV2(this);
+    this.eth = new ETH(this);
   }
 
   public Spell() {
@@ -178,6 +184,7 @@ export class NUB {
     return transaction;
   }
 
+
   public async appprove(tokenAddress: string, amount: string) {
     const contract = new this.web3.eth.Contract(Abi.basics.erc20, tokenAddress);
     const from = await this.internal.getAddress();
@@ -227,6 +234,11 @@ export class NUB {
       .cast(encodedSpells.targets, encodedSpells.spells, params.origin || Addresses.genesis)
       .encodeABI();
 
+    return data;
+  }
+
+  private async getContractData(method:any, ...params: any[] ) {
+    const data = method(...params).encodeABI();
     return data;
   }
 }

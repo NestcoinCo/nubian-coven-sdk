@@ -48,7 +48,7 @@ const nub = new NUB({
 
 ## Casting Spells
 
-**Spells** denotes a sequence of connector functions that will achieve a given use case. Spells can comprise of any number of functions across any number of connectors.
+**Spells** denotes a sequence of connector functions that will achieve a given use case. Spells can comprise any number of functions across any number of connectors.
 
 With this SDK, performing DeFi operations on your dapp consists of creating a `spells` instance to add transactions. Here is where you can initiate complex transactions amongst different protocols.
 
