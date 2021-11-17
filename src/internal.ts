@@ -216,7 +216,7 @@ export class Internal {
    */
   estimateGas = async (params: EstimateGasParams) => {
     const data = this.nub.web3.eth.abi.encodeFunctionCall(params.abi, params.args);
-
+    console.log("estimate Params", params);
     try {
       const estimatedGas = await this.nub.web3.eth.estimateGas({
         from: params.from,
