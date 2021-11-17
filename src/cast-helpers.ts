@@ -25,7 +25,7 @@ export class CastHelpers {
     const to = params.to ?? '';
 
     if (to === Addresses.genesis)
-      throw new Error(`Please verify that the address of the implementation contract has been set and is valid`);
+      throw new Error(`Please verify that the address of the wizard contract (implementation) has been set and is valid`);
 
     const { targets, spells } = this.nub.internal.encodeSpells(params);
     const args = [targets, spells, this.nub.origin];
