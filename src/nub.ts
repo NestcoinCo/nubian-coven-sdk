@@ -44,7 +44,7 @@ export class NUB {
   CHAIN_ID: ChainId = 56;
   GAS_PRICE: number = 5000000000;
   // value of uint(-1).
-  public readonly maxValue = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
+  public readonly maxValue = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
 
   readonly config: NUBConfig;
   readonly castHelpers = new CastHelpers(this);
@@ -145,6 +145,46 @@ export class NUB {
 
         return price;
       };
+    })();
+  }
+
+  public Farm(){
+    const self = this;
+    return new (class Farm {
+
+      contractInstance;
+      constructor()
+      {
+        this.contractInstance = new self.web3.eth.Contract(Abi.AutoFarm, Addresses.protocols.autofarm);
+      }
+
+      async deposit(lpToken: string, poolId: number, amount: number){
+        let from = await self.internal.getAddress();
+        const resp = await this.contractInstance.methods.deposit(poolId, amount).send({from});
+        return resp;
+      }
+
+      async withdraw(amount: number, poolId: number){
+        let resp;
+        let from = await self.internal.getAddress();
+        if(amount == self.maxValue){
+          resp = await this.contractInstance.methods.withdrawAll(poolId).send({from})
+        }else{
+          resp = await this.contractInstance.methods.withdraw(poolId, amount).send({from})
+        }
+      }
+
+      async harvest(poolId: number)
+      {
+        let from = await self.internal.getAddress();
+        const amt = await this.contractInstance.methods.pendingAUTO(poolId,from).call({from})
+
+        if (amt != 0) {
+          const resp = await this.contractInstance.methods.withdraw(poolId, 0);
+          return resp;
+        }
+        return amt;
+      }
     })();
   }
 
