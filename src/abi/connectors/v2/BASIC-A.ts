@@ -1,6 +1,6 @@
 import { AbiItem } from 'web3-utils';
 
-export const Basic: AbiItem[] = [
+export const BASIC_A: AbiItem[] = [
   {
     anonymous: false,
     inputs: [
