@@ -7,10 +7,12 @@ import * as basics from './basics';
 import { connectors } from './connectors';
 import { core } from './core';
 import { read } from './read';
+import { protocols } from './protocols';
 
 export const Abi = {
   basics,
   connectors,
   core,
   read,
+  protocols
 };
