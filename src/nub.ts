@@ -14,7 +14,9 @@ import { Spells } from './spells';
 import { Transaction } from './transaction';
 import { wrapIfSpells, PancakeV2, ETH } from './utils';
 import { Erc20 } from './utils/erc20';
+import {AutoFarm, Venus, Wbnb} from './protocols';
 
+import { protocols } from './addresses/mainnet/protocols';
 type NUBConfig =
   | {
       web3: Web3;
@@ -49,6 +51,11 @@ export class NUB {
   readonly config: NUBConfig;
   readonly castHelpers = new CastHelpers(this);
   readonly transaction = new Transaction(this);
+
+  //Initialize Protocols
+  AutoFarm = new AutoFarm(this);
+  Venus = new Venus(this);
+  Wbnb = new Wbnb(this);
 
   public encodeSpells = (...args: Parameters<Internal['encodeSpells']>) => this.internal.encodeSpells(...args);
   public sendTransaction = (...args: Parameters<Transaction['send']>) => this.transaction.send(...args);
@@ -216,6 +223,36 @@ export class NUB {
     });
 
     console.log('transactionConfig: ', transactionConfig);
+
+    //check the typf of transaction
+    let _params : Spells = <Spells>params;
+    let isWrapTransaction : boolean = false;
+    if(_params.data)
+    {
+      for(var i = 0; i<_params.data.length; i++){
+        let spell = _params.data[i];
+        if(spell.connector == "PancakeV2" && spell.method == "sell")
+        {
+          if(spell.args[0] == Addresses.tokens.wbnb && spell.args[1] == Addresses.tokens.bnb)
+          {
+            //wrap
+            isWrapTransaction = true;
+            await this.Wbnb.deposit(spell.args[2]);
+            return;
+          }
+          if(spell.args[0] == Addresses.tokens.bnb && spell.args[1] == Addresses.tokens.wbnb)
+          {
+            //unwrap
+            isWrapTransaction = true;
+            await this.Wbnb.withdraw(spell.args[2]);
+            return;
+          }
+        }
+
+      }
+    }
+
+    if(isWrapTransaction) return;
 
     const transaction = await this.transaction.send(transactionConfig);
 
