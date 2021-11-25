@@ -41,9 +41,12 @@ export class PancakeV2 {
       if (tokens[i] === this.WBNB_A) {
         continue;
       }
+
+      const token = new this.nub.web3.eth.Contract(this.ERC20_ABI, tokens[i]);
+      const tokenDecimals = await token.methods.decimals().call();
   
       try{
-        bnbValue = (await router.methods.getAmountsOut(this.nub.web3.utils.toWei("1", "ether"), [
+        bnbValue = (await router.methods.getAmountsOut((new BigNumber(10)).pow(tokenDecimals), [
           tokens[i], this.WBNB_A]).call())[1];
       }catch(err){
         console.log(err, "err");
@@ -57,7 +60,7 @@ export class PancakeV2 {
       
       const lpSupply = await lpToken.methods.totalSupply().call();
   
-      const token = new this.nub.web3.eth.Contract(this.ERC20_ABI, tokens[i]);
+      
       let lpBalance = await token.methods.balanceOf(lpAddress).call();
   
       bnbPrice = new BigNumber(bnbPrice);
@@ -65,8 +68,8 @@ export class PancakeV2 {
 
       const tokenPrice = bnbPrice.times(bnbValue).div(10**18).div(10**18);
   
-      const totalUSDValue = (lpBalance.times(2).times(tokenPrice));
-      return totalUSDValue.div(lpSupply).toFixed(2);
+      const totalUSDValue = (lpBalance.times(2).times(tokenPrice).div((new BigNumber(10)).pow(tokenDecimals)));
+      return totalUSDValue.div(lpSupply).times(this.nub.web3.utils.toWei("1", "ether")).toFixed(2);
     }
   
     return 0;
