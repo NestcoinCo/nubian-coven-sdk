@@ -115,7 +115,12 @@ export class NUB {
           console.log('No spells casted. Add spells with `.add(...)`.');
           return;
         }
-        const gas = await vm.castHelpers.estimateGas({ spells: this, ...params });
+        
+        const gas = await vm.castHelpers.estimateGas({ 
+          spells: this, ...params, 
+          to: Addresses.core[vm.CHAIN_ID].versions[vm.VERSION].implementations
+        });
+
         const price = await this.getCurrentGasPrices(true);
         return {
           gas,
