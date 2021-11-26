@@ -60,21 +60,22 @@ describe("Venus Deposit", () => {
   //   expect(txHash).toBeDefined();
   // }) 
 
-  // test("Test Estimate Cast Gas", async () => {
-  //   let spells = nub.Spell();
-  //   //deposit BNB
-  //   spells.add({
-  //     connector: "BASIC-A",
-  //     method: "deposit",
-  //     args: [
-  //       "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
-  //       "100000000000000",
-  //       0,
-  //       0
-  //     ]
-  //   })
+  test("Test Estimate Cast Gas", async () => {
+    console.log(nub.config);
+    let spells = nub.Spell();
+    //deposit BNB
+    spells.add({
+      connector: "BASIC-A",
+      method: "deposit",
+      args: [
+        "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+        "100000000000000",
+        0,
+        0
+      ]
+    })
 
-  //   const price = await spells.estimateCastGas({value: "100000000000000"});
-  //   console.log(price);
-  // });
+    const price = await spells.estimateCastGas({value: "100000000000000"});
+    console.log(price);
+  });
 });

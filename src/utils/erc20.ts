@@ -122,7 +122,7 @@ export class Erc20 {
       params.from = await this.nub.internal.getAddress();
     }
     if (!params.amount) {
-      params.amount = this.nub.maxValue;
+      params.amount = this.nub.maxValue + "";
     }
 
     let txObj: TransactionConfig;

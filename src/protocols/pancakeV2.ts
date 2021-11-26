@@ -1,5 +1,4 @@
 import { NUB } from '../nub';
-import axios from 'axios';
 import { Abi } from '../abi';
 import { Addresses } from '../addresses';
 import { AbiItem } from "web3-utils";
@@ -17,7 +16,7 @@ export class PancakeV2 {
   public ROUTER02_A: string = Addresses.protocols.pancakeswap.chains[this.nub.CHAIN_ID].versions[this.version].ROUTER02;
   
   // abis
-  public ROUTER02_ABI: AbiItem[] = Abi.protocols.pancakeswap.v2.router02;
+  public ROUTER02_ABI: AbiItem[] = Abi.pancakeswap.v2.router02;
   public ERC20_ABI: AbiItem[] = Abi.basics.erc20;
 
   constructor(private nub: NUB) {}
@@ -27,7 +26,7 @@ export class PancakeV2 {
    */
   async getLpPrice(lpAddress: string) {
     const lpToken = new this.nub.web3.eth.Contract(
-      Abi.protocols.pancakeswap.v2.lpToken, 
+      Abi.pancakeswap.v2.lpToken, 
       lpAddress
     );
     const router = new this.nub.web3.eth.Contract(this.ROUTER02_ABI, 

@@ -3,10 +3,9 @@
 // export * as connectorsV2_M1 from './connectorsV2_M1'
 
 import { core } from './core';
+import { protocols } from './protocols';
 import { CONNECTORS_V2_M1 as connectorsV2_M1_Mainnet } from './mainnet/connectorsV2_M1';
 import { CONNECTORS_V2_M1 as connectorsV2_M1_Testnet } from './mainnet/connectorsV2_M1';
-import { PANCAKESWAP_V2 as pancakeswapV2_Mainnet } from './mainnet/pancakeswapv2';
-import { PANCAKESWAP_V2 as pancakeswapV2_Testnet } from './testnet/pancakeswapv2';
 import { TOKENS as TOKENS_MAINNET  } from './mainnet/tokens';
 import { TOKENS as TOKENS_TESTNET  } from './testnet/tokens';
 
@@ -27,22 +26,7 @@ export const Addresses = {
       },
     },
   },
-  protocols: {
-    pancakeswap:{
-      chains: {
-        56: {
-          versions:{
-            2: pancakeswapV2_Mainnet
-          } 
-        },
-        97:{
-          versions:{
-            2: pancakeswapV2_Testnet
-          }
-        }
-      }
-    }
-  },
+  protocols,
   tokens: {
     chains: {
       97: TOKENS_TESTNET,
