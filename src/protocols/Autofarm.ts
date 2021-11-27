@@ -8,7 +8,7 @@ export default class AutoFarm {
     nubInstance: NUB;
     constructor(nub: NUB)
     {
-      this.contractInstance = new nub.web3.eth.Contract(Abi.AutoFarm, Addresses.protocols.autofarm);
+      this.contractInstance = new nub.web3.eth.Contract(Abi.AutoFarm, Addresses.protocols.autofarm.chains[nub.CHAIN_ID].versions[2].AutoFarmV2);
       this.nubInstance = nub;
     }
 

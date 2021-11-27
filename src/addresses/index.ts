@@ -3,16 +3,15 @@
 // export * as connectorsV2_M1 from './connectorsV2_M1'
 
 import { core } from './core';
+import { protocols } from './protocols';
 import { CONNECTORS_V2_M1 as connectorsV2_M1_Mainnet } from './mainnet/connectorsV2_M1';
 import { CONNECTORS_V2_M1 as connectorsV2_M1_Testnet } from './mainnet/connectorsV2_M1';
-import {protocols } from './mainnet/protocols';
-import { tokens } from './mainnet/tokens';
+import { TOKENS as TOKENS_MAINNET  } from './mainnet/tokens';
+import { TOKENS as TOKENS_TESTNET  } from './testnet/tokens';
 
 export const Addresses = {
   genesis: '0x0000000000000000000000000000000000000000',
   core,
-  protocols,
-  tokens,
   connectors: {
     chains: {
       97: {
@@ -27,4 +26,11 @@ export const Addresses = {
       },
     },
   },
+  protocols,
+  tokens: {
+    chains: {
+      97: TOKENS_TESTNET,
+      56: TOKENS_MAINNET
+    }
+  }
 };

@@ -16,7 +16,6 @@ import { wrapIfSpells, PancakeV2, ETH } from './utils';
 import { Erc20 } from './utils/erc20';
 import {AutoFarm, Venus, Wbnb} from './protocols';
 
-import { protocols } from './addresses/mainnet/protocols';
 type NUBConfig =
   | {
       web3: Web3;
@@ -52,10 +51,10 @@ export class NUB {
   readonly castHelpers = new CastHelpers(this);
   readonly transaction = new Transaction(this);
 
-  //Initialize Protocols
-  AutoFarm = new AutoFarm(this);
-  Venus = new Venus(this);
-  Wbnb = new Wbnb(this);
+  // Initialize Protocols
+  public AutoFarm;
+  public Venus;
+  public Wbnb;
 
   public encodeSpells = (...args: Parameters<Internal['encodeSpells']>) => this.internal.encodeSpells(...args);
   public sendTransaction = (...args: Parameters<Transaction['send']>) => this.transaction.send(...args);
@@ -98,6 +97,9 @@ export class NUB {
     this.erc20 = new Erc20(this);
     this.pancakeswap = new PancakeV2(this);
     this.eth = new ETH(this);
+    this.AutoFarm = new AutoFarm(this);
+    this.Venus = new Venus(this);
+    this.Wbnb = new Wbnb(this);
   }
 
   public Spell() {
@@ -122,7 +124,12 @@ export class NUB {
           console.log('No spells casted. Add spells with `.add(...)`.');
           return;
         }
-        const gas = await vm.castHelpers.estimateGas({ spells: this, ...params });
+        
+        const gas = await vm.castHelpers.estimateGas({ 
+          spells: this, ...params, 
+          to: Addresses.core[vm.CHAIN_ID].versions[vm.VERSION].implementations
+        });
+
         const price = await this.getCurrentGasPrices(true);
         return {
           gas,
@@ -162,7 +169,10 @@ export class NUB {
       contractInstance;
       constructor()
       {
-        this.contractInstance = new self.web3.eth.Contract(Abi.AutoFarm, Addresses.protocols.autofarm);
+        this.contractInstance = new self.web3.eth.Contract(
+          Abi.AutoFarm, 
+          Addresses.protocols.autofarm.chains[self.CHAIN_ID].versions[2].AutoFarmV2
+        );
       }
 
       async deposit(lpToken: string, poolId: number, amount: number){
@@ -233,14 +243,14 @@ export class NUB {
         let spell = _params.data[i];
         if(spell.connector == "PancakeV2" && spell.method == "sell")
         {
-          if(spell.args[0] == Addresses.tokens.wbnb && spell.args[1] == Addresses.tokens.bnb)
+          if(spell.args[0] == Addresses.tokens.chains[this.CHAIN_ID].WBNB && spell.args[1] == Addresses.tokens.chains[this.CHAIN_ID].BNB)
           {
             //wrap
             isWrapTransaction = true;
             await this.Wbnb.deposit(spell.args[2]);
             return;
           }
-          if(spell.args[0] == Addresses.tokens.bnb && spell.args[1] == Addresses.tokens.wbnb)
+          if(spell.args[0] == Addresses.tokens.chains[this.CHAIN_ID].BNB && spell.args[1] == Addresses.tokens.chains[this.CHAIN_ID].WBNB)
           {
             //unwrap
             isWrapTransaction = true;
