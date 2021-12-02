@@ -12,9 +12,9 @@ import { Addresses } from './addresses';
 import { Internal, Version } from './internal';
 import { Spells } from './spells';
 import { Transaction } from './transaction';
-import { wrapIfSpells, PancakeV2, ETH } from './utils';
+import { wrapIfSpells, ETH } from './utils';
 import { Erc20 } from './utils/erc20';
-import {AutoFarm, Venus, Wbnb} from './protocols';
+import {AutoFarm, Venus, PancakeV2, Wbnb} from './protocols';
 
 type NUBConfig =
   | {
@@ -52,8 +52,8 @@ export class NUB {
   readonly transaction = new Transaction(this);
 
   // Initialize Protocols
-  public AutoFarm;
-  public Venus;
+  public autoFarm;
+  public venus;
   public Wbnb;
 
   public encodeSpells = (...args: Parameters<Internal['encodeSpells']>) => this.internal.encodeSpells(...args);
@@ -97,8 +97,8 @@ export class NUB {
     this.erc20 = new Erc20(this);
     this.pancakeswap = new PancakeV2(this);
     this.eth = new ETH(this);
-    this.AutoFarm = new AutoFarm(this);
-    this.Venus = new Venus(this);
+    this.autoFarm = new AutoFarm(this);
+    this.venus = new Venus(this);
     this.Wbnb = new Wbnb(this);
   }
 
