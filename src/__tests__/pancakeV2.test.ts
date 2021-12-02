@@ -19,7 +19,7 @@ beforeAll(() => {
 
 describe("Venus Deposit", () => {
   
-  xtest("Deposit in Venus", async () => {
+  xtest("Deposit in Pancakeswap", async () => {
     let spells = nub.Spell();
     //deposit BNB
     spells.add({
@@ -59,7 +59,7 @@ describe("Venus Deposit", () => {
     expect(txHash).toBeDefined();
   })
   
-  xtest("Withdraw from Venus", async () => {
+  xtest("Withdraw from Pancakeswap", async () => {
     let spells = nub.Spell();
     
     //deposit BNB
