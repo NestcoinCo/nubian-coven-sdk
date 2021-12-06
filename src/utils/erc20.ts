@@ -18,7 +18,7 @@ import { Contract } from 'web3-eth-contract';
  */
 type Erc20InputParams = {
   token: keyof typeof TokenInfo | string;
-  amount: string;
+  amount?: number|string;
 } & Pick<TransactionConfig, 'from' | 'gas' | 'gasPrice' | 'nonce' | 'to'>;
 
 /**
@@ -26,6 +26,8 @@ type Erc20InputParams = {
  */
 
 export class Erc20 {
+  readonly maxValue = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+
   constructor(private nub: NUB) {}
   /**
    * Transfer
@@ -122,7 +124,7 @@ export class Erc20 {
       params.from = await this.nub.internal.getAddress();
     }
     if (!params.amount) {
-      params.amount = this.nub.maxValue + "";
+      params.amount = this.maxValue ;
     }
 
     let txObj: TransactionConfig;

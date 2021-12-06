@@ -8,7 +8,7 @@ import BigNumber from "bignumber.js";
  * generic ERC20 token methods
  */
 
-export class PancakeV2 {
+export default class PancakeV2 {
   private version:2 = 2;
   // addresses
   public WBNB_A: string = Addresses.tokens.chains[this.nub.CHAIN_ID].WBNB;
