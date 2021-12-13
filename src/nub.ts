@@ -244,7 +244,6 @@ export class NUB {
   public async estimateGasForTokenTransfer(tokenAddress: string, receiver: string, amount: number) {
     const contract = new this.web3.eth.Contract(Abi.basics.erc20, tokenAddress);
     const from = await this.internal.getAddress();
-    console.log(contract, this.GAS_PRICE, from);
     const gas = await contract.methods.transfer(receiver, amount).estimateGas({ gasPrice: this.GAS_PRICE, from });
     return {gas, price: this.GAS_PRICE, fee: gas * this.GAS_PRICE};
   }
