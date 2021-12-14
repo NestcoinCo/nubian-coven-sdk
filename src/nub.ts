@@ -14,23 +14,23 @@ import { Spells } from './spells';
 import { Transaction } from './transaction';
 import { wrapIfSpells, ETH } from './utils';
 import { Erc20 } from './utils/erc20';
-import {AutoFarm, Venus, PancakeV2, Wbnb} from './protocols';
+import { AutoFarm, Venus, PancakeV2, Wbnb } from './protocols';
 
 type NUBConfig =
   | {
-      web3: Web3;
-      mode: 'node';
-      privateKey: string;
-    }
+    web3: Web3;
+    mode: 'node';
+    privateKey: string;
+  }
   | {
-      web3: Web3;
-      mode: 'simulation';
-      publicKey: string;
-    }
+    web3: Web3;
+    mode: 'simulation';
+    publicKey: string;
+  }
   | {
-      web3: Web3;
-      mode?: 'browser';
-    };
+    web3: Web3;
+    mode?: 'browser';
+  };
 
 type ChainId = 56 | 97;
 
@@ -124,9 +124,9 @@ export class NUB {
           console.log('No spells casted. Add spells with `.add(...)`.');
           return;
         }
-        
-        const gas = await vm.castHelpers.estimateGas({ 
-          spells: this, ...params, 
+
+        const gas = await vm.castHelpers.estimateGas({
+          spells: this, ...params,
           to: Addresses.core[vm.CHAIN_ID].versions[vm.VERSION].implementations
         });
 
@@ -156,52 +156,8 @@ export class NUB {
 
       getCurrentGasPrices = async (useFixedPrice: boolean) => {
         const price = 5000000000;
-
         return price;
       };
-    })();
-  }
-
-  public Farm(){
-    const self = this;
-    return new (class Farm {
-
-      contractInstance;
-      constructor()
-      {
-        this.contractInstance = new self.web3.eth.Contract(
-          Abi.AutoFarm, 
-          Addresses.protocols.autofarm.chains[self.CHAIN_ID].versions[2].AutoFarmV2
-        );
-      }
-
-      async deposit(lpToken: string, poolId: number, amount: number){
-        let from = await self.internal.getAddress();
-        const resp = await this.contractInstance.methods.deposit(poolId, amount).send({from});
-        return resp;
-      }
-
-      async withdraw(amount: number, poolId: number){
-        let resp;
-        let from = await self.internal.getAddress();
-        if(amount == self.maxValue){
-          resp = await this.contractInstance.methods.withdrawAll(poolId).send({from})
-        }else{
-          resp = await this.contractInstance.methods.withdraw(poolId, amount).send({from})
-        }
-      }
-
-      async harvest(poolId: number)
-      {
-        let from = await self.internal.getAddress();
-        const amt = await this.contractInstance.methods.pendingAUTO(poolId,from).call({from})
-
-        if (amt != 0) {
-          const resp = await this.contractInstance.methods.withdraw(poolId, 0);
-          return resp;
-        }
-        return amt;
-      }
     })();
   }
 
@@ -235,23 +191,19 @@ export class NUB {
     console.log('transactionConfig: ', transactionConfig);
 
     //check the typf of transaction
-    let _params : Spells = <Spells>params;
-    let isWrapTransaction : boolean = false;
-    if(_params.data)
-    {
-      for(var i = 0; i<_params.data.length; i++){
+    let _params: Spells = <Spells>params;
+    let isWrapTransaction: boolean = false;
+    if (_params.data) {
+      for (var i = 0; i < _params.data.length; i++) {
         let spell = _params.data[i];
-        if(spell.connector == "PancakeV2" && spell.method == "sell")
-        {
-          if(spell.args[0] == Addresses.tokens.chains[this.CHAIN_ID].WBNB && spell.args[1] == Addresses.tokens.chains[this.CHAIN_ID].BNB)
-          {
+        if (spell.connector == "PancakeV2" && spell.method == "sell") {
+          if (spell.args[0] == Addresses.tokens.chains[this.CHAIN_ID].WBNB && spell.args[1] == Addresses.tokens.chains[this.CHAIN_ID].BNB) {
             //wrap
             isWrapTransaction = true;
             await this.Wbnb.deposit(spell.args[2]);
             return;
           }
-          if(spell.args[0] == Addresses.tokens.chains[this.CHAIN_ID].BNB && spell.args[1] == Addresses.tokens.chains[this.CHAIN_ID].WBNB)
-          {
+          if (spell.args[0] == Addresses.tokens.chains[this.CHAIN_ID].BNB && spell.args[1] == Addresses.tokens.chains[this.CHAIN_ID].WBNB) {
             //unwrap
             isWrapTransaction = true;
             await this.Wbnb.withdraw(spell.args[2]);
@@ -262,7 +214,7 @@ export class NUB {
       }
     }
 
-    if(isWrapTransaction) return;
+    if (isWrapTransaction) return;
 
     const transaction = await this.transaction.send(transactionConfig);
 
@@ -292,8 +244,8 @@ export class NUB {
   public async estimateGasForTokenTransfer(tokenAddress: string, receiver: string, amount: number) {
     const contract = new this.web3.eth.Contract(Abi.basics.erc20, tokenAddress);
     const from = await this.internal.getAddress();
-    const gas = await contract.methods.transfer(receiver, amount).estimateGas({ gas: this.GAS_PRICE, from });
-    return gas;
+    const gas = await contract.methods.transfer(receiver, amount).estimateGas({ gasPrice: this.GAS_PRICE, from });
+    return {gas, price: this.GAS_PRICE, fee: gas * this.GAS_PRICE};
   }
 
   public async transferToken(tokenAddress: string, receiver: string, amount: number) {
