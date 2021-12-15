@@ -1,1 +1,1 @@
-export {default as getGasPrice} from "./gas";
+// export {default as getGasPrice} from "./gas";
