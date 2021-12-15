@@ -1,0 +1,24 @@
+name: Build Project
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '12.x'
+          cache: "npm"
+
+      - name: 'Install NPM'
+        run: npm install
+
+      - name: 'Run Lint Check'
+        run: npm run lint
+
+      - name: 'Run Build'
+        run: npm run build
+
+      - name: 'Run Test'
+        run: npm test
