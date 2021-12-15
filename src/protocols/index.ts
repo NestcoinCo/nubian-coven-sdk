@@ -1,4 +1,4 @@
-export { default as AutoFarm }  from './autofarm';
+export { default as AutoFarm }  from './Autofarm';
 export { default as Venus } from './Venus';
 export { default as Wbnb } from './Wbnb';
-export { default as PancakeV2 }  from './PancakeV2';
+export { default as PancakeV2 }  from './pancakeV2';
