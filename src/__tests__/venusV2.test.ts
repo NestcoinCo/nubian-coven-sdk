@@ -14,6 +14,8 @@ const TUSD = "0x14016e85a25aeb13065688cafb43044c2ef86784";
 const vTUSD = "0x08ceb3f4a7ed3500ca0982bcd0fc7816688084c3";
 const CAKE = "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82";
 const vCAKE = "0x86ac3974e2bd0d60825230fa6f355ff11409df5c";
+const vBUSD = "0x95c78222B3D6e262426483D42CfA53685A67Ab9D";
+const BUSD = "0xe9e7cea3dedca5984780bafc599bd69add087d56";
 
 const maxAmt = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 let address: string;
@@ -28,7 +30,7 @@ beforeAll(() => {
   address = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY).address;
 })
 
-describe("Venus Test", () => {
+xdescribe("Venus Test", () => {
   
   xtest("Deposit in Venus", async () => {
     //await nub.erc20.approve({token: CAKE, gasPrice})
@@ -74,8 +76,8 @@ describe("Venus Test", () => {
     expect(txHash).toBeDefined();
   })
   
-  xtest("Withdraw from Venus", async () => {
-    await nub.erc20.approve({token: vTUSD, gasPrice});
+  test("Withdraw from Venus", async () => {
+    //await nub.erc20.approve({token: vBUSD, gasPrice});
     let spells = nub.Spell();
     
     //deposit vTUSD in Wizard
@@ -83,7 +85,7 @@ describe("Venus Test", () => {
       connector: "BASIC-A",
       method: "deposit",
       args: [
-        vTUSD,
+        vBUSD,
         maxAmt,
         0,
         0
@@ -95,7 +97,7 @@ describe("Venus Test", () => {
       connector: "VenusV2",
       method: "withdraw",
       args: [
-        "TUSD-A",
+        "BUSD-A",
         maxAmt,
         0,
         0
@@ -107,7 +109,7 @@ describe("Venus Test", () => {
       connector: "BASIC-A",
       method: "withdraw",
       args: [
-        TUSD,
+        BUSD,
         maxAmt,
         address, // address to receive vBNB
         0,

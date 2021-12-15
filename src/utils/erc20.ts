@@ -29,13 +29,28 @@ export class Erc20 {
   readonly maxValue = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
   constructor(private nub: NUB) {}
+
+  private getGas = async (transactionConfig: TransactionConfig) => {
+    return ((await this.nub.web3.eth.estimateGas(transactionConfig)) * 1.1).toFixed(0); // increasing gas cost by 10% for margin
+  };
   /**
    * Transfer
    */
   async transfer(params: Erc20InputParams): Promise<string> {
     const txObj: TransactionConfig = await this.transferTxObj(params);
-
+    
     return this.nub.sendTransaction(txObj);
+  }
+
+  async estimateTransferGas(params: Erc20InputParams){
+    const txObj: TransactionConfig = await this.transferTxObj(params);
+    const gas = await this.getGas(txObj);
+
+    return {
+      gas,
+      price: this.nub.GAS_PRICE,
+      fee: +gas*this.nub.GAS_PRICE
+    }
   }
 
   /**
@@ -111,6 +126,17 @@ export class Erc20 {
     const txObj: TransactionConfig = await this.approveTxObj(params);
 
     return this.nub.sendTransaction(txObj);
+  }
+
+  async estimateApproveGas(params: Erc20InputParams){
+    const txObj: TransactionConfig = await this.approveTxObj(params);
+    const gas = await this.getGas(txObj);
+    
+    return {
+      gas,
+      price: this.nub.GAS_PRICE,
+      fee: +gas * this.nub.GAS_PRICE
+    }
   }
 
   /**
