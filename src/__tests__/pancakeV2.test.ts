@@ -1,12 +1,27 @@
 const Web3 = require("web3");
-import axios from "axios";
-import { log } from "console";
+import {  } from 'web3-core';
+import { getGasPrice } from "./utils";
+import { Console, log } from "console";
 import NUB from "..";
-require('dotenv').config()
+import constants from "./constants";
+require('dotenv').config();
+import { BigNumber } from "bignumber.js";
 
-let web3;
+let web3: any;
 let nub: NUB;
-let gasPrice: string = '20000000000';
+let user: string;
+const {abi: {LP_ABI },
+  addresses: {mainnet: {tokens: {BNB: TokenA, BUSD: TokenB, WBNB_BUSD_LP: LP},
+    protocols: {Wizard}}},
+  utils: {maxUint256}
+} = constants;
+const {
+  addresses: {mainnet: {tokens: {BNB, WBNB}}}
+} = constants;
+let tokenA: any, tokenB: any, lpToken: any;
+
+// amounts
+const [ amountA, amountB, LPamount ] = ["003422160000000000", "1800000000000000000", "065337351229019145"];
 
 beforeAll(() => {
   web3 = new Web3(new Web3.providers.HttpProvider("https://bsc-dataseed.binance.org/"));
@@ -15,108 +30,196 @@ beforeAll(() => {
     mode: 'node',
     privateKey: process.env.PRIVATE_KEY || "",
   });
+
+  user = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY).address;
+  tokenA = new web3.eth.Contract(LP_ABI, TokenA);
+  tokenB = new web3.eth.Contract(LP_ABI, TokenB);
+  lpToken = new web3.eth.Contract(LP_ABI, LP);
 })
 
-describe("Venus Deposit", () => {
-  
-  xtest("Deposit in Pancakeswap", async () => {
+xdescribe("Pancakeswap", () => {
+
+  //deposit PRED/BUSD
+  xtest("Pancakeswap Deposit", async () => {
+    const slippage_In_percent = 0.02; 
+    const amountB_W_Slippage = (new BigNumber(amountB)).minus(new BigNumber(amountB).times(slippage_In_percent));
+    const unitAmt = amountB_W_Slippage.div(amountA).times(10**18).toFixed(0);
+    const slippage = (new BigNumber(10**18)).times(slippage_In_percent);
+
+    //approve tokens
+    if(TokenA !== BNB){
+      let approved = await tokenA.methods.allowance(user, Wizard).call();
+      if(approved < Number(amountA) ){
+        await nub.erc20.approve({token: TokenA, gasPrice: web3.utils.toWei(await getGasPrice(), "gwei")});
+      }
+    }
+    if(TokenB !== BNB){
+      let approved = await tokenB.methods.allowance(user, Wizard).call();
+      if(approved < Number(amountB)){
+        await nub.erc20.approve( { token: TokenB, gasPrice: web3.utils.toWei(await getGasPrice(), "gwei") } );
+      }
+    }
+
+
     let spells = nub.Spell();
-    //deposit BNB
+    // deposit in Wizard
     spells.add({
       connector: "BASIC-A",
       method: "deposit",
       args: [
-        "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
-        "100000000000000",
+        TokenA,
+        amountA,
         0,
         0
       ]
-    })
+    });
+
+    // deposit in Wizard
     spells.add({
-      connector: "VenusV2",
+      connector: "BASIC-A",
       method: "deposit",
       args: [
-        "BNB-A",
-        "100000000000000",
+        TokenB,
+        amountB,
+        0,
+        0
+      ]
+    });
+
+    // deposit tokens in Pancakeswap
+    spells.add({
+      connector: "PancakeV2",
+      method: "deposit",
+      args: [
+        TokenA,
+        TokenB,
+        maxUint256, // address to receive vBNB
+        unitAmt,
+        slippage,
         0,
         0
       ]
     })
-    //withdraw vBNB from Wizard
+
+    // withdraw BUSD from Wizard
     spells.add({
       connector: "BASIC-A",
       method: "withdraw",
       args: [
-        "0xA07c5b74C9B40447a954e1466938b865b6BBea36",
-        "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-        "0xd8Ee094FeB76A51dFE00e08Fbb1206c8b4B54D8E", // address to receive vBNB
+        TokenB === WBNB ? WBNB : TokenA,
+        maxUint256,
+        user, 
         0,
         0
       ]
     })
-  
-    const txHash = spells.cast({value: "100000000000000", gasPrice})
+
+    // withdraw PRED from Wizard
+    spells.add({
+      connector: "BASIC-A",
+      method: "withdraw",
+      args: [
+        TokenA === WBNB ? WBNB : TokenA,
+        maxUint256,
+        user,
+        0,
+        0
+      ]
+    })
+    
+    // withdraw lpToken from Wizard
+    spells.add({
+      connector: "BASIC-A",
+      method: "withdraw",
+      args: [
+        LP,
+        maxUint256,
+        user, // address to receive lpTokens
+        0,
+        0
+      ]
+    })
+
+    const value = TokenA === BNB ? amountA : ( TokenB === BNB ? amountB : 0 );
+    const txHash = await spells.cast({
+      gasPrice: web3.utils.toWei(await getGasPrice(), "gwei"), 
+      value
+    });
+    console.log(txHash);
     expect(txHash).toBeDefined();
   })
-  
-  xtest("Withdraw from Pancakeswap", async () => {
+
+  test("Pancakeswap Withdrawal", async () => {
+    const slippage_In_percent = 0.02; 
+    const amountB_W_Slippage = (new BigNumber(amountB)).minus(new BigNumber(amountB).times(slippage_In_percent));
+    const amountA_W_Slippage = (new BigNumber(amountA)).minus(new BigNumber(amountA).times(slippage_In_percent));
+    console.log(amountA_W_Slippage.toString(), amountB_W_Slippage.toString());
+    const unitBAmt = amountB_W_Slippage.div(LPamount).times(10**18).toFixed(0);
+    const unitAAmt = amountA_W_Slippage.div(LPamount).times(10**18).toFixed(0);
+
+
     let spells = nub.Spell();
     
-    //deposit BNB
+    //await nub.erc20.approve( { token: LP, gasPrice: await getGasPrice() });
+    let approved = await lpToken.methods.allowance(user, Wizard).call();
+    if(approved < Number(LPamount)){
+      await nub.erc20.approve({token: LP, gasPrice: web3.utils.toWei(await getGasPrice(), "gwei")});
+    }
+
     spells.add({
       connector: "BASIC-A",
       method: "deposit",
       args: [
-        "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
-        "100000000000000",
+        LP,
+        maxUint256,
         0,
         0
       ]
-    })
+    });
+
     spells.add({
-      connector: "VenusV2",
-      method: "deposit",
+      connector: "PancakeV2",
+      method: "withdraw",
       args: [
-        "BNB-A",
-        "100000000000000",
+        TokenA,
+        TokenB,
+        LPamount,
+        unitAAmt,
+        unitBAmt,
         0,
-        0
+        [0,0],
       ]
     })
 
-    //withdraw vBNB from Wizard
+    //withdraw BUSD from Wizard
     spells.add({
       connector: "BASIC-A",
       method: "withdraw",
       args: [
-        "0xA07c5b74C9B40447a954e1466938b865b6BBea36",
-        "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-        "0xd8Ee094FeB76A51dFE00e08Fbb1206c8b4B54D8E", // address to receive vBNB
+        TokenB,
+        maxUint256,
+        user, 
         0,
         0
       ]
     })
-  
-    const txHash = spells.cast({value: "100000000000000", gasPrice})
-    expect(txHash).toBeDefined();
-  })
 
-  xtest("Test Estimate Cast Gas", async () => {
-    console.log(nub.config);
-    let spells = nub.Spell();
-    //deposit BNB
+    //withdraw PRED from Wizard
     spells.add({
       connector: "BASIC-A",
-      method: "deposit",
+      method: "withdraw",
       args: [
-        "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
-        "100000000000000",
+        TokenA,
+        maxUint256,
+        user,
         0,
         0
       ]
     })
 
-    const price = await spells.estimateCastGas({value: "100000000000000"});
-    console.log(price);
-  });
+    const txHash = await spells.cast({gasPrice: web3.utils.toWei(await getGasPrice(), "gwei")})
+    console.log(txHash);
+    expect(txHash).toBeDefined();
+  })
 });
+

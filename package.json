@@ -1,6 +1,6 @@
 {
   "name": "nubian-coven-sdk",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "sdk for connecting Nubian Coven Contracts. ",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -40,6 +40,7 @@
   "devDependencies": {
     "@types/jest": "^27.0.2",
     "@types/node": "^16.11.7",
+    "bignumber.js": "^9.0.2",
     "dotenv": "^10.0.0",
     "jest": "^27.3.1",
     "prettier": "^2.4.1",
@@ -54,7 +55,6 @@
   ],
   "dependencies": {
     "axios": "^0.24.0",
-    "bignumber.js": "^9.0.1",
     "web3": "^1.6.1"
   }
 }

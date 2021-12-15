@@ -20,7 +20,7 @@ beforeAll(() => {
   });
 });
 
-describe("AutoFarm BNB/CAKE lp Tests", () => {
+xdescribe("AutoFarm BNB/CAKE lp Tests", () => {
   xtest("deposit BNB/CAKE lp", async () => {
 
     //await nub.erc20.approve({ token: "0x0ed7e52944161450477ee417de9cd3a859b14fd0", gasPrice, to: nub.autoFarm.autofarmAddress});

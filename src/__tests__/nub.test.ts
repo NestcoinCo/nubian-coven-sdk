@@ -2,11 +2,16 @@ const Web3 = require("web3");
 import axios from "axios";
 import { log } from "console";
 import NUB from "..";
-require('dotenv').config()
+require('dotenv').config();
+import constants from "./constants";
+
 
 let web3;
 let nub: NUB;
 let gasPrice: string = '20000000000';
+const {
+  addresses: {mainnet: {tokens: { PRED }}}
+} = constants;
 
 beforeAll(() => {
   web3 = new Web3(new Web3.providers.HttpProvider("https://bsc-dataseed.binance.org/"));
@@ -17,106 +22,16 @@ beforeAll(() => {
   });
 })
 
-describe("Venus Deposit", () => {
-  
-  xtest("Deposit in Venus", async () => {
-    let spells = nub.Spell();
-    //deposit BNB
-    spells.add({
-      connector: "BASIC-A",
-      method: "deposit",
-      args: [
-        "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
-        "100000000000000",
-        0,
-        0
-      ]
-    })
-    spells.add({
-      connector: "VenusV2",
-      method: "deposit",
-      args: [
-        "BNB-A",
-        "100000000000000",
-        0,
-        0
-      ]
-    })
-    //withdraw vBNB from Wizard
-    spells.add({
-      connector: "BASIC-A",
-      method: "withdraw",
-      args: [
-        "0xA07c5b74C9B40447a954e1466938b865b6BBea36",
-        "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-        "0xd8Ee094FeB76A51dFE00e08Fbb1206c8b4B54D8E", // address to receive vBNB
-        0,
-        0
-      ]
-    })
-  
-    const txHash = spells.cast({value: "100000000000000", gasPrice})
-    expect(txHash).toBeDefined();
+xdescribe('Estimate gas', () => {
+  test("Estimate Gas", async () => {
+    console.log(PRED);
+    const price_obj = await nub.estimateGasForTokenTransfer( 
+      PRED, 
+      "0xD559864407F8B95a097200c85b657ED75db7cfc9", 
+      1000000, 
+    );
+
+    console.log(price_obj);
   })
-  
-  xtest("Withdraw from Venus", async () => {
-    let spells = nub.Spell();
-    
-    //deposit BNB
-    spells.add({
-      connector: "BASIC-A",
-      method: "deposit",
-      args: [
-        "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
-        "100000000000000",
-        0,
-        0
-      ]
-    })
-    spells.add({
-      connector: "VenusV2",
-      method: "deposit",
-      args: [
-        "BNB-A",
-        "100000000000000",
-        0,
-        0
-      ]
-    })
-
-    //withdraw vBNB from Wizard
-    spells.add({
-      connector: "BASIC-A",
-      method: "withdraw",
-      args: [
-        "0xA07c5b74C9B40447a954e1466938b865b6BBea36",
-        "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-        "0xd8Ee094FeB76A51dFE00e08Fbb1206c8b4B54D8E", // address to receive vBNB
-        0,
-        0
-      ]
-    })
-  
-    const txHash = spells.cast({value: "100000000000000", gasPrice})
-    expect(txHash).toBeDefined();
-  })
-
-  xtest("Test Estimate Cast Gas", async () => {
-    console.log(nub.config);
-    let spells = nub.Spell();
-    //deposit BNB
-    spells.add({
-      connector: "BASIC-A",
-      method: "deposit",
-      args: [
-        "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
-        "100000000000000",
-        0,
-        0
-      ]
-    })
-
-    const price = await spells.estimateCastGas({value: "100000000000000"});
-    console.log(price);
-  });
 });
+

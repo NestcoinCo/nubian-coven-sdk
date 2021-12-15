@@ -6,7 +6,7 @@ import { GetTransactionConfigParams } from '../internal';
 
 type AutoFarmParams = {
   poolId: string
-  amount?: string;
+  amount: string;
 } & Pick<TransactionConfig, 'from' | 'gas' | 'gasPrice' | 'nonce' | 'to'>;
 
 export default class AutoFarm {
@@ -28,6 +28,9 @@ export default class AutoFarm {
       }
       if(!params.amount){
         throw new Error("Deposit amount not specified")  
+      }
+      if(!params.poolId){
+        throw new Error("Pool Id not specified");
       }
       if(params.amount = this.maxValue){
         let poolInfo = await this.contractInstance.methods.poolInfo(params.poolId).call();
@@ -59,6 +62,9 @@ export default class AutoFarm {
       if(!params.amount){
         throw new Error("Withdraw amount not specified");
       }
+      if(!params.poolId){
+        throw new Error("Pool Id not specified");
+      }
 
       params.to = this.autofarmAddress;
       const data = await this.contractInstance.methods.withdraw(params.poolId, params.amount).encodeABI()
@@ -78,6 +84,9 @@ export default class AutoFarm {
     async harvest(params: AutoFarmParams){
       if(!params.from){
         params.from = await this.nubInstance.internal.getAddress();
+      }
+      if(!params.poolId){
+        throw new Error("Pool Id not specified");
       }
 
       params.to = this.autofarmAddress;
