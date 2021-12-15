@@ -1,5 +1,5 @@
-import { pancakeswap } from "./pancakeswap"
+import { pancakeswap } from './pancakeswap';
 
 export const protocols = {
-  pancakeswap
-}
+  pancakeswap,
+};

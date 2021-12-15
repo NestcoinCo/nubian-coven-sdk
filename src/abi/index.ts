@@ -21,5 +21,5 @@ export const Abi = {
   AutoFarm,
   Venus,
   Wbnb,
-  pancakeswap
+  pancakeswap,
 };

@@ -25,7 +25,6 @@ type ETHInputParams = {
  */
 
 export class ETH {
-
   constructor(private nub: NUB) {}
 
   private getGas = async (transactionConfig: TransactionConfig) => {
@@ -48,8 +47,8 @@ export class ETH {
     return {
       gas,
       price: this.nub.GAS_PRICE,
-      fee: +gas*this.nub.GAS_PRICE
-    }
+      fee: +gas * this.nub.GAS_PRICE,
+    };
   }
 
   /**

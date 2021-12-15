@@ -1,3 +1,1 @@
-export const VENUS = {
-  
-};
+export const VENUS = {};

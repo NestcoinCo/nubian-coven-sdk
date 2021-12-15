@@ -1,7 +1,5 @@
-
 export const TOKENS = {
-  WBNB: "",
-  BUSD: "",
-  BNB : "",
-}
-  
+  WBNB: '',
+  BUSD: '',
+  BNB: '',
+};

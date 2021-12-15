@@ -1,3 +1,3 @@
 export const PANCAKESWAP_V2 = {
-  ROUTER02: "",
+  ROUTER02: '',
 };

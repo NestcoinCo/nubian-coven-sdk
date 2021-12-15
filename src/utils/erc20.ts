@@ -18,7 +18,7 @@ import { Contract } from 'web3-eth-contract';
  */
 type Erc20InputParams = {
   token: keyof typeof TokenInfo | string;
-  amount?: number|string;
+  amount?: number | string;
 } & Pick<TransactionConfig, 'from' | 'gas' | 'gasPrice' | 'nonce' | 'to'>;
 
 /**
@@ -26,7 +26,7 @@ type Erc20InputParams = {
  */
 
 export class Erc20 {
-  readonly maxValue = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+  readonly maxValue = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
 
   constructor(private nub: NUB) {}
 
@@ -38,19 +38,19 @@ export class Erc20 {
    */
   async transfer(params: Erc20InputParams): Promise<string> {
     const txObj: TransactionConfig = await this.transferTxObj(params);
-    
+
     return this.nub.sendTransaction(txObj);
   }
 
-  async estimateTransferGas(params: Erc20InputParams){
+  async estimateTransferGas(params: Erc20InputParams) {
     const txObj: TransactionConfig = await this.transferTxObj(params);
     const gas = await this.getGas(txObj);
 
     return {
       gas,
       price: this.nub.GAS_PRICE,
-      fee: +gas*this.nub.GAS_PRICE
-    }
+      fee: +gas * this.nub.GAS_PRICE,
+    };
   }
 
   /**
@@ -128,15 +128,15 @@ export class Erc20 {
     return this.nub.sendTransaction(txObj);
   }
 
-  async estimateApproveGas(params: Erc20InputParams){
+  async estimateApproveGas(params: Erc20InputParams) {
     const txObj: TransactionConfig = await this.approveTxObj(params);
     const gas = await this.getGas(txObj);
-    
+
     return {
       gas,
       price: this.nub.GAS_PRICE,
-      fee: +gas * this.nub.GAS_PRICE
-    }
+      fee: +gas * this.nub.GAS_PRICE,
+    };
   }
 
   /**
@@ -150,7 +150,7 @@ export class Erc20 {
       params.from = await this.nub.internal.getAddress();
     }
     if (!params.amount) {
-      params.amount = this.maxValue ;
+      params.amount = this.maxValue;
     }
 
     let txObj: TransactionConfig;

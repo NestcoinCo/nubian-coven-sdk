@@ -1,3 +1,3 @@
 export const AUTOFARMV2 = {
-  AutoFarmV2: "",
+  AutoFarmV2: '',
 };

@@ -18,19 +18,19 @@ import { AutoFarm, Venus, PancakeV2, Wbnb } from './protocols';
 
 type NUBConfig =
   | {
-    web3: Web3;
-    mode: 'node';
-    privateKey: string;
-  }
+      web3: Web3;
+      mode: 'node';
+      privateKey: string;
+    }
   | {
-    web3: Web3;
-    mode: 'simulation';
-    publicKey: string;
-  }
+      web3: Web3;
+      mode: 'simulation';
+      publicKey: string;
+    }
   | {
-    web3: Web3;
-    mode?: 'browser';
-  };
+      web3: Web3;
+      mode?: 'browser';
+    };
 
 type ChainId = 56 | 97;
 
@@ -126,8 +126,9 @@ export class NUB {
         }
 
         const gas = await vm.castHelpers.estimateGas({
-          spells: this, ...params,
-          to: Addresses.core[vm.CHAIN_ID].versions[vm.VERSION].implementations
+          spells: this,
+          ...params,
+          to: Addresses.core[vm.CHAIN_ID].versions[vm.VERSION].implementations,
         });
 
         const price = await this.getCurrentGasPrices(true);
@@ -190,27 +191,31 @@ export class NUB {
 
     console.log('transactionConfig: ', transactionConfig);
 
-    //check the typf of transaction
-    let _params: Spells = <Spells>params;
+    // check the typf of transaction
+    const _params: Spells = params as Spells;
     let isWrapTransaction: boolean = false;
     if (_params.data) {
-      for (var i = 0; i < _params.data.length; i++) {
-        let spell = _params.data[i];
-        if (spell.connector == "PancakeV2" && spell.method == "sell") {
-          if (spell.args[0] == Addresses.tokens.chains[this.CHAIN_ID].WBNB && spell.args[1] == Addresses.tokens.chains[this.CHAIN_ID].BNB) {
-            //wrap
+      for (const spell of _params.data) {
+        if (spell.connector === 'PancakeV2' && spell.method === 'sell') {
+          if (
+            spell.args[0] === Addresses.tokens.chains[this.CHAIN_ID].WBNB &&
+            spell.args[1] === Addresses.tokens.chains[this.CHAIN_ID].BNB
+          ) {
+            // wrap
             isWrapTransaction = true;
             await this.Wbnb.deposit(spell.args[2]);
             return;
           }
-          if (spell.args[0] == Addresses.tokens.chains[this.CHAIN_ID].BNB && spell.args[1] == Addresses.tokens.chains[this.CHAIN_ID].WBNB) {
-            //unwrap
+          if (
+            spell.args[0] === Addresses.tokens.chains[this.CHAIN_ID].BNB &&
+            spell.args[1] === Addresses.tokens.chains[this.CHAIN_ID].WBNB
+          ) {
+            // unwrap
             isWrapTransaction = true;
             await this.Wbnb.withdraw(spell.args[2]);
             return;
           }
         }
-
       }
     }
 
@@ -245,7 +250,7 @@ export class NUB {
     const contract = new this.web3.eth.Contract(Abi.basics.erc20, tokenAddress);
     const from = await this.internal.getAddress();
     const gas = await contract.methods.transfer(receiver, amount).estimateGas({ gasPrice: this.GAS_PRICE, from });
-    return {gas, price: this.GAS_PRICE, fee: gas * this.GAS_PRICE};
+    return { gas, price: this.GAS_PRICE, fee: gas * this.GAS_PRICE };
   }
 
   public async transferToken(tokenAddress: string, receiver: string, amount: number) {
