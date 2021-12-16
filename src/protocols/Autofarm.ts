@@ -6,7 +6,7 @@ import { GetTransactionConfigParams } from '../internal';
 
 type AutoFarmParams = {
   poolId: string
-  amount: string;
+  amount?: string;
 } & Pick<TransactionConfig, 'from' | 'gas' | 'gasPrice' | 'nonce' | 'to'>;
 
 export default class AutoFarm {
@@ -32,11 +32,12 @@ export default class AutoFarm {
       if(!params.poolId){
         throw new Error("Pool Id not specified");
       }
-      if(params.amount = this.maxValue){
-        let poolInfo = await this.contractInstance.methods.poolInfo(params.poolId).call();
-        let lpTokenAddress = poolInfo.want; 
-        let lpTokenContract = new this.nubInstance.web3.eth.Contract(Abi.basics.erc20, lpTokenAddress);
-        let balance = await lpTokenContract.methods.balanceOf(params.from).call();
+      
+      if(params.amount === this.maxValue){
+        const poolInfo = await this.contractInstance.methods.poolInfo(params.poolId).call();
+        const lpTokenAddress = poolInfo.want; 
+        const lpTokenContract = new this.nubInstance.web3.eth.Contract(Abi.basics.erc20, lpTokenAddress);
+        const balance = await lpTokenContract.methods.balanceOf(params.from).call();
         params.amount = balance;
       }
 

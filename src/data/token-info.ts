@@ -41,4 +41,11 @@ export const TokenInfo = {
     address: '0x8ed39e59daf86cd1b598ac5cc363da896660b35d',
     decimals: 18,
   },
+  wbnb: {
+    type: 'token',
+    symbol: 'WBNB',
+    name: 'Wrapped BNB',
+    address: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+    decimals: 18
+  }
 };

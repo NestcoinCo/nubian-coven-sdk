@@ -14,7 +14,7 @@ import { Spells } from './spells';
 import { Transaction } from './transaction';
 import { wrapIfSpells, ETH } from './utils';
 import { Erc20 } from './utils/erc20';
-import { AutoFarm, Venus, PancakeV2, Wbnb } from './protocols';
+import { AutoFarm, PancakeV2, Wbnb } from './protocols';
 
 type NUBConfig =
   | {
@@ -53,7 +53,6 @@ export class NUB {
 
   // Initialize Protocols
   public autoFarm;
-  public venus;
   public Wbnb;
 
   public encodeSpells = (...args: Parameters<Internal['encodeSpells']>) => this.internal.encodeSpells(...args);
@@ -98,7 +97,6 @@ export class NUB {
     this.pancakeswap = new PancakeV2(this);
     this.eth = new ETH(this);
     this.autoFarm = new AutoFarm(this);
-    this.venus = new Venus(this);
     this.Wbnb = new Wbnb(this);
   }
 
@@ -190,21 +188,21 @@ export class NUB {
 
     console.log('transactionConfig: ', transactionConfig);
 
-    //check the typf of transaction
-    let _params: Spells = <Spells>params;
+    // check the typf of transaction
+    const _params: Spells = params as Spells;
     let isWrapTransaction: boolean = false;
     if (_params.data) {
-      for (var i = 0; i < _params.data.length; i++) {
-        let spell = _params.data[i];
-        if (spell.connector == "PancakeV2" && spell.method == "sell") {
-          if (spell.args[0] == Addresses.tokens.chains[this.CHAIN_ID].WBNB && spell.args[1] == Addresses.tokens.chains[this.CHAIN_ID].BNB) {
-            //wrap
+      for (const i of _params.data) {
+        const spell = i;
+        if (spell.connector === "PancakeV2" && spell.method === "sell") {
+          if (spell.args[0] === Addresses.tokens.chains[this.CHAIN_ID].WBNB && spell.args[1] === Addresses.tokens.chains[this.CHAIN_ID].BNB) {
+            // wrap
             isWrapTransaction = true;
             await this.Wbnb.deposit(spell.args[2]);
             return;
           }
-          if (spell.args[0] == Addresses.tokens.chains[this.CHAIN_ID].BNB && spell.args[1] == Addresses.tokens.chains[this.CHAIN_ID].WBNB) {
-            //unwrap
+          if (spell.args[0] === Addresses.tokens.chains[this.CHAIN_ID].BNB && spell.args[1] === Addresses.tokens.chains[this.CHAIN_ID].WBNB) {
+            // unwrap
             isWrapTransaction = true;
             await this.Wbnb.withdraw(spell.args[2]);
             return;

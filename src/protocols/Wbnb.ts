@@ -13,14 +13,14 @@ export default class Wbnb {
     }
 
     public async deposit(amount: number){
-      let from = await this.nubInstance.internal.getAddress();
+      const from = await this.nubInstance.internal.getAddress();
       const resp = await this.contractInstance.methods.deposit(amount).send({from});
       return resp;
     }
 
     public async withdraw(amount: number){
       let resp;
-      let from = await this.nubInstance.internal.getAddress();
+      const from = await this.nubInstance.internal.getAddress();
       resp = await this.contractInstance.methods.withdraw(amount).send({from})
     }
   }
