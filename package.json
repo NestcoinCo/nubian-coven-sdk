@@ -55,7 +55,6 @@
     "lib/**/*"
   ],
   "dependencies": {
-    "@uniswap/sdk": "^3.0.3",
     "axios": "^0.24.0",
     "source-map-support": "^0.5.21",
     "web3": "^1.6.1"

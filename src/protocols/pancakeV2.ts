@@ -5,7 +5,6 @@ import { AbiItem } from "web3-utils";
 import BigNumber from "bignumber.js";
 import { TransactionConfig } from 'web3-core';
 import { TokenInfo } from '../data/token-info';
-import { Pair, Token } from "@uniswap/sdk";
 
 /**
  * @param {address} _d.token token address or symbol
