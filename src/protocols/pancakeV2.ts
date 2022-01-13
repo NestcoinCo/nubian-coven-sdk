@@ -135,7 +135,6 @@ export default class PancakeV2 {
           try{
             const pair = (await 
             getPairs(BASES_TO_CHECK_TRADES_AGAINST[i], [BASES_TO_CHECK_TRADES_AGAINST[j]]))[0];
-            console.log(pair, BASES_TO_CHECK_TRADES_AGAINST[i], BASES_TO_CHECK_TRADES_AGAINST[j]);
             pair && intermediatePairs.push(pair);
           }
           catch(err){}
