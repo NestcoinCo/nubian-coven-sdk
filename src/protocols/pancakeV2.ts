@@ -160,7 +160,7 @@ export default class PancakeV2 {
     };
 
     const getOptimalOutcome = async (routes: string[][]) => {
-      let bestOutcome: [string, string[]] = ["0", [""]];
+      let bestOutcome: [string, string[]] = ["0", []];
       for(let route of routes){
         const tokenContract = new this.nub.web3.eth.Contract(this.ERC20_ABI, tokenIn);
         const tokenDecimals = await tokenContract.methods.decimals().call();
