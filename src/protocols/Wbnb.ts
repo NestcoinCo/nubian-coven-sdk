@@ -12,13 +12,39 @@ export default class Wbnb {
       this.nubInstance = nub;
     }
 
-    public async deposit(amount: number){
+    async estimateWrapGas(amount: number){
+      const from = (await this.nubInstance.internal.getAddress())!;
+      const abi = this.nubInstance.internal.getInterface(Abi.Wbnb, "deposit")!;
+      const gas = await this.nubInstance.internal.estimateGas({
+        from,
+        to: Addresses.tokens.chains[this.nubInstance.CHAIN_ID].WBNB,
+        abi,
+        value: amount,
+        args: []
+      })
+
+      return {gas, price: this.nubInstance.GAS_PRICE, fee: gas * this.nubInstance.GAS_PRICE};
+    }
+    async wrap(amount: number){
       let from = await this.nubInstance.internal.getAddress();
       const resp = await this.contractInstance.methods.deposit(amount).send({from});
       return resp;
     }
 
-    public async withdraw(amount: number){
+    async estimateUnWrapGas(amount: number){
+      const from = (await this.nubInstance.internal.getAddress())!;
+      const abi = this.nubInstance.internal.getInterface(Abi.Wbnb, "withdraw")!;
+      const gas = await this.nubInstance.internal.estimateGas({
+        from,
+        to: Addresses.tokens.chains[this.nubInstance.CHAIN_ID].WBNB,
+        abi,
+        value: 0,
+        args: [amount]
+      })
+
+      return { gas, price: this.nubInstance.GAS_PRICE, fee: gas * this.nubInstance.GAS_PRICE };
+    }
+    async unwrap(amount: number){
       let resp;
       let from = await this.nubInstance.internal.getAddress();
       resp = await this.contractInstance.methods.withdraw(amount).send({from})

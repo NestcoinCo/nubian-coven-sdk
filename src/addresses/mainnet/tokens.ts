@@ -8,6 +8,6 @@ export const TOKENS = {
   ETH: "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
   USDC: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
   BTCB: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
-  BNB : "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  BNB : "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
 }
   
