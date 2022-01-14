@@ -1,43 +1,48 @@
-// const Web3 = require("web3");
-// import {  } from 'web3-core';
+const Web3 = require("web3");
+import {  } from 'web3-core';
 // import { getGasPrice } from "./utils";
 // import { Console, log } from "console";
-// import NUB from "..";
-// import constants from "./constants";
-// require('dotenv').config();
+import NUB from "..";
+import constants from "./constants";
+require('dotenv').config();
 // import { BigNumber } from "bignumber.js";
 
-// let web3: any;
-// let nub: NUB;
-// let user: string;
-// const {abi: {LP_ABI },
-//   addresses: {mainnet: {tokens: {BNB: TokenA, BUSD: TokenB, WBNB_BUSD_LP: LP},
-//     protocols: {Wizard}}},
-//   utils: {maxUint256}
-// } = constants;
-// const {
-//   addresses: {mainnet: {tokens: {BNB, WBNB}}}
-// } = constants;
-// let tokenA: any, tokenB: any, lpToken: any;
+let web3: any;
+let nub: NUB;
+let user: string;
+const {abi: {LP_ABI },
+  addresses: {mainnet: {tokens: {BNB: TokenA, BUSD: TokenB, WBNB_BUSD_LP: LP},
+    protocols: {Wizard}}},
+  utils: {maxUint256}
+} = constants;
+const {
+  addresses: {mainnet: {tokens: {BNB, WBNB}}}
+} = constants;
+let tokenA: any, tokenB: any, lpToken: any;
 
 // // amounts
 // const [ amountA, amountB, LPamount ] = ["003422160000000000", "1800000000000000000", "065337351229019145"];
 
-// beforeAll(() => {
-//   web3 = new Web3(new Web3.providers.HttpProvider("https://bsc-dataseed.binance.org/"));
-//   nub = new NUB({
-//     web3: web3,
-//     mode: 'node',
-//     privateKey: process.env.PRIVATE_KEY || "",
-//   });
+beforeAll(() => {
+  web3 = new Web3(new Web3.providers.HttpProvider("https://bsc-dataseed.binance.org/"));
+  nub = new NUB({
+    web3: web3,
+    mode: 'node',
+    privateKey: process.env.PRIVATE_KEY || "",
+  });
 
-//   user = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY).address;
-//   tokenA = new web3.eth.Contract(LP_ABI, TokenA);
-//   tokenB = new web3.eth.Contract(LP_ABI, TokenB);
-//   lpToken = new web3.eth.Contract(LP_ABI, LP);
-// })
+  user = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY).address;
+  tokenA = new web3.eth.Contract(LP_ABI, TokenA);
+  tokenB = new web3.eth.Contract(LP_ABI, TokenB);
+  lpToken = new web3.eth.Contract(LP_ABI, LP);
+})
 
-// xdescribe("Pancakeswap", () => {
+describe("Pancakeswap", () => {
+
+  test("Pancakeswap Route", async () => {
+    const outcome = await nub.pancakeswap.getRoute("0x6bff4fb161347ad7de4a625ae5aa3a1ca7077819", "0xac51066d7bec65dc4589368da368b212745d63e8");
+    console.log(outcome)
+  });
 
 //   //deposit PRED/BUSD
 //   xtest("Pancakeswap Deposit", async () => {
@@ -220,5 +225,6 @@
 //     console.log(txHash);
 //     expect(txHash).toBeDefined();
 //   })
-// });
+});
+
 

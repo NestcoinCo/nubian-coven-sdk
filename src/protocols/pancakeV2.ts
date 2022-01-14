@@ -65,7 +65,7 @@ export default class PancakeV2 {
         bnbValue = (await this.router.methods.getAmountsOut((new BigNumber(10)).pow(tokenDecimals), [
           tokens[i], this.WBNB_A]).call())[1];
       }catch(err){
-        console.log(err, "err");
+        console.log("Error in getting BNB value", err);
       }
   
       if(bnbValue === 0) continue;
@@ -92,22 +92,21 @@ export default class PancakeV2 {
   }
 
   async getRoute(tokenIn:string, tokenOut: string){
-    if(tokenIn === this.BNB_A) tokenIn = this.WBNB_A;
-    if(tokenOut === this.BNB_A) tokenOut = this.WBNB_A;
-    if(tokenIn === tokenOut) throw new Error("TokenIn and TokenOut cannot be equal");
+    const _tokenIn = tokenIn === this.BNB_A ? this.WBNB_A : tokenIn;
+    const _tokenOut = tokenOut === this.BNB_A ? this.WBNB_A : tokenOut;
+    if(_tokenIn === _tokenOut) throw new Error("TokenIn and TokenOut cannot be equal");
 
     const getPairs = async (token: string, bases: string[], order?: ORDER ) => {
       const pairs: [string, string][] = [];
       for(let base of bases){
         if(base === token) continue;
-        console.log("token, base", token, base)
           const address = await this.factory.methods.getPair(token, base).call();
           address !== Addresses.genesis && pairs.push(order === ORDER.IN ? [token, base]: [base, token]);
       }
       return pairs;
     }
 
-    let directPair = (await getPairs(tokenIn, [tokenOut], ORDER.IN))[0];
+    let directPair = (await getPairs(_tokenIn, [_tokenOut], ORDER.IN))[0];
 
     const routes: string[][] = [];
     // single-hop route
@@ -116,12 +115,12 @@ export default class PancakeV2 {
     // two-hop routes
     let [tokenInPairs, tokenOutPairs]: [[string, string][], [string, string][]] = [[], []];
     if(routes.length === 0){
-        tokenInPairs = await getPairs(tokenIn, BASES_TO_CHECK_TRADES_AGAINST, ORDER.IN);
-        tokenOutPairs = await getPairs(tokenOut, BASES_TO_CHECK_TRADES_AGAINST, ORDER.OUT);
+        tokenInPairs = await getPairs(_tokenIn, BASES_TO_CHECK_TRADES_AGAINST, ORDER.IN);
+        tokenOutPairs = await getPairs(_tokenOut, BASES_TO_CHECK_TRADES_AGAINST, ORDER.OUT);
         tokenInPairs.forEach(pairIn => {
         tokenOutPairs.forEach(pairOut => {
           if(pairIn[1] === pairOut[0]){
-            routes.push([...pairIn, tokenOut])
+            routes.push([...pairIn, _tokenOut])
           }
         })
       });
@@ -137,7 +136,9 @@ export default class PancakeV2 {
             getPairs(BASES_TO_CHECK_TRADES_AGAINST[i], [BASES_TO_CHECK_TRADES_AGAINST[j]]))[0];
             pair && intermediatePairs.push(pair);
           }
-          catch(err){}
+          catch(err){
+            console.log("Error in get pair", err)
+          }
         }
       }
 
@@ -153,7 +154,7 @@ export default class PancakeV2 {
       intermediateRoutes.forEach(routeIn => {
         tokenOutPairs.forEach(pairOut => {
           if(routeIn[2] === pairOut[0]){
-            routes.push([...routeIn, tokenOut])
+            routes.push([...routeIn, _tokenOut])
           }
         })
       })
@@ -162,7 +163,7 @@ export default class PancakeV2 {
     const getOptimalOutcome = async (routes: string[][]) => {
       let bestOutcome: [string, string[]] = ["0", []];
       for(let route of routes){
-        const tokenContract = new this.nub.web3.eth.Contract(this.ERC20_ABI, tokenIn);
+        const tokenContract = new this.nub.web3.eth.Contract(this.ERC20_ABI, _tokenIn);
         const tokenDecimals = await tokenContract.methods.decimals().call();
         try{
           const amounts = (await this.router.methods.getAmountsOut(
@@ -170,8 +171,15 @@ export default class PancakeV2 {
             route).call());
           const amount = amounts[amounts.length-1];
           if((new BigNumber(amount)).gt(bestOutcome[0])) bestOutcome = [amount, route];
-        }catch(err){}
+        }catch(err){
+          console.log("Error in getting amount", err);
+        }
+
       };
+
+      // replaces WETH changes back to ETH
+      bestOutcome[1][0] = tokenIn;
+      bestOutcome[1][bestOutcome[1].length-1] = tokenOut;
       return bestOutcome;
     }
     
