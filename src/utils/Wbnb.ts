@@ -38,9 +38,7 @@ export default class Wbnb {
 
     async unwrap(params: WbnbParams){
       const txObj = await this.unwrapTxObj(params);
-      console.log(txObj);
       const resp = await this.nubInstance.sendTransaction(txObj);
-      console.log("ewif");
       return resp;
     }
 
