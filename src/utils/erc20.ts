@@ -1,6 +1,6 @@
-import { Abi } from '../abi';
+import { Abi } from '../constants/abi';
 import { NUB } from '../nub';
-import { Addresses } from '../addresses';
+import { Addresses } from '../constants/addresses';
 import { TokenInfo } from '../data/token-info';
 import * as Math from './math';
 import { TransactionConfig } from 'web3-core';

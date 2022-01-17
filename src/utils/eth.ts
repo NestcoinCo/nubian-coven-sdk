@@ -1,11 +1,8 @@
-import { Abi } from '../abi';
+
 import { NUB } from '../nub';
-import { Addresses } from '../addresses';
-import { TokenInfo } from '../data/token-info';
-import * as Math from './math';
+import { Addresses } from '../constants/addresses';
 import { TransactionConfig } from 'web3-core';
 import { GetTransactionConfigParams } from '../internal';
-import { Contract } from 'web3-eth-contract';
 
 /**
  * @param {address} _d.token token address or symbol

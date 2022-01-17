@@ -6,14 +6,14 @@
 
 import Web3 from 'web3';
 import { TransactionConfig } from 'web3-core';
-import { Abi } from './abi';
+import { Abi } from './constants/abi';
 import { CastHelpers } from './cast-helpers';
-import { Addresses } from './addresses';
+import { Addresses } from './constants/addresses';
 import { Internal, Version } from './internal';
 import { Spells } from './spells';
 import { Transaction } from './transaction';
 import { wrapIfSpells, ETH } from './utils';
-import { Erc20 } from './utils/erc20';
+import { Erc20 } from './utils/Erc20';
 import { AutoFarm, Venus, PancakeV2, Wbnb } from './protocols';
 
 type NUBConfig =

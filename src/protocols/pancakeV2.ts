@@ -1,6 +1,6 @@
 import { NUB } from '../nub';
-import { Abi } from '../abi';
-import { Addresses } from '../addresses';
+import { Abi } from '../constants/abi';
+import { Addresses } from '../constants/addresses';
 import { AbiItem } from "web3-utils";
 import BigNumber from "bignumber.js";
 
@@ -174,7 +174,6 @@ export default class PancakeV2 {
         }catch(err){
           console.log("Error in getting amount", err);
         }
-
       };
 
       // replaces WETH changes back to ETH
