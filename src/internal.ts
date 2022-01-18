@@ -1,9 +1,9 @@
 import { TransactionConfig } from 'web3-core';
 import { AbiItem } from 'web3-utils';
 import NUB from '.';
-import { Abi } from './abi';
-import { Connector } from './abi/connectors';
-import { Addresses } from './addresses';
+import { Abi } from './constants/abi';
+import { Connector } from './constants/abi/connectors';
+import { Addresses } from './constants/addresses';
 import { TokenInfo } from './data/token-info';
 import { EstimatedGasException } from './exceptions/estimated-gas-exception';
 import { Spells } from './spells';
@@ -21,7 +21,7 @@ export interface GetTransactionConfigParams {
 }
 
 export type Version = keyof typeof Abi.connectors.versions;
-export { Connector } from './abi/connectors';
+export { Connector } from './constants/abi/connectors';
 
 export type EstimateGasParams = {
   abi: AbiItem;

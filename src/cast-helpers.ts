@@ -1,7 +1,7 @@
 import { TransactionConfig } from 'web3-core';
 import NUB from '.';
-import { Abi } from './abi';
-import { Addresses } from './addresses';
+import { Abi } from './constants/abi';
+import { Addresses } from './constants/addresses';
 import { Spells } from './spells';
 import { wrapIfSpells } from './utils';
 

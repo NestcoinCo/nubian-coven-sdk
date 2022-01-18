@@ -1,27 +1,27 @@
 // const Web3 = require("web3");
 // import {  } from 'web3-core';
 // import { getGasPrice } from "./utils";
-// import { Console, log } from "console";
+// // import { Console, log } from "console";
 // import NUB from "..";
-// import constants from "./constants";
+// import { Addresses } from "../constants/addresses";
+// import { Abi } from "../constants/abi";
 // require('dotenv').config();
 // import { BigNumber } from "bignumber.js";
 
 // let web3: any;
 // let nub: NUB;
 // let user: string;
-// const {abi: {LP_ABI },
-//   addresses: {mainnet: {tokens: {BNB: TokenA, BUSD: TokenB, WBNB_BUSD_LP: LP},
-//     protocols: {Wizard}}},
-//   utils: {maxUint256}
-// } = constants;
-// const {
-//   addresses: {mainnet: {tokens: {BNB, WBNB}}}
-// } = constants;
+// // const {abi:
+// // } = constants;
+// const {pancakeswap: {v2: {lpToken: LP_ABI} }} = Abi;
+// const {tokens: {chains: {56: {BNB: TokenA, PRED: TokenB, BUSD_PRED_LP: LP}}},
+//   core: {56: {versions: {2: {wizard}}}}} = Addresses;
+// const {tokens: {chains: {56: {BNB}}}} = Addresses
 // let tokenA: any, tokenB: any, lpToken: any;
 
 // // amounts
-// const [ amountA, amountB, LPamount ] = ["003422160000000000", "1800000000000000000", "065337351229019145"];
+// const [ amountA, amountB, LPamount ] = ["000002160000000000", "1800000000000000000", "065337351229019145"];
+// const maxUint256 = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
 // beforeAll(() => {
 //   web3 = new Web3(new Web3.providers.HttpProvider("https://bsc-dataseed.binance.org/"));
@@ -37,7 +37,83 @@
 //   lpToken = new web3.eth.Contract(LP_ABI, LP);
 // })
 
-// xdescribe("Pancakeswap", () => {
+// describe("Pancakeswap", () => {
+
+  // test("Pancakeswap Route", async () => {
+  //   const outcome = await nub.pancakeswap.getRoute("0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "0xac51066d7bec65dc4589368da368b212745d63e8");
+  //   console.log(outcome)
+  // });
+
+    //swap 
+    // test("Pancakeswap Swap", async () => {
+    //   const slippage_In_percent = 0.02; 
+    //   const unitAmt = new BigNumber(amountB).div(amountA).times(10**18).toFixed(0);
+    //   const slippage = (new BigNumber(10**18)).times(slippage_In_percent);
+    //   const route = (await nub.pancakeswap.getRoute(TokenA, TokenB))[1];
+
+    //   //approve tokens
+    //   if(TokenA !== BNB){
+    //     let approved = await tokenA.methods.allowance(user, wizard).call();
+    //     if(approved < Number(amountA) ){
+    //       await nub.erc20.approve({token: TokenA, gasPrice: web3.utils.toWei(await getGasPrice(), "gwei")});
+    //     }
+    //   }
+    //   if(TokenB !== BNB){
+    //     let approved = await tokenB.methods.allowance(user, wizard).call();
+    //     if(approved < Number(amountB)){
+    //       await nub.erc20.approve( { token: TokenB, gasPrice: web3.utils.toWei(await getGasPrice(), "gwei") } );
+    //     }
+    //   }
+
+
+    //   let spells = nub.Spell();
+    //   // deposit in Wizard
+    //   spells.add({
+    //     connector: "BASIC-A",
+    //     method: "deposit",
+    //     args: [
+    //       TokenA,
+    //       amountA,
+    //       0,
+    //       0
+    //     ]
+    //   });
+
+    //   console.log(route);
+    //   // sell tokens in Pancakeswap
+    //   spells.add({
+    //     connector: "Pancake",
+    //     method: "sell",
+    //     args: [
+    //       route,
+    //       amountA,
+    //       1,
+    //       0,
+    //       0
+    //     ]
+    //   });  
+
+    //   // withdraw token from Wizard
+    //   spells.add({
+    //     connector: "BASIC-A",
+    //     method: "withdraw",
+    //     args: [
+    //       TokenB,
+    //       maxUint256,
+    //       user, // address to receive lpTokens
+    //       0,
+    //       0
+    //     ]
+    //   })
+
+    //   const value = TokenA === BNB ? amountA : 0;
+    //   const txHash = await spells.cast({
+    //     gasPrice: web3.utils.toWei(await getGasPrice(), "gwei"), 
+    //     value
+    //   });
+    //   console.log(txHash);
+    //   expect(txHash).toBeDefined();
+    // })
 
 //   //deposit PRED/BUSD
 //   xtest("Pancakeswap Deposit", async () => {
@@ -221,4 +297,5 @@
 //     expect(txHash).toBeDefined();
 //   })
 // });
+
 

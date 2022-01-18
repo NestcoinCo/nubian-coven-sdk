@@ -1,6 +1,6 @@
 import NUB from "..";
-import { Abi } from "../abi";
-import { Addresses } from "../addresses";
+import { Abi } from "../constants/abi";
+import { Addresses } from "../constants/addresses";
 import { TransactionConfig } from 'web3-core';
 import { GetTransactionConfigParams } from '../internal';
 

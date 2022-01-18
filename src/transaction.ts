@@ -1,6 +1,6 @@
 // @ts-ignore
 import { TransactionConfig } from 'web3-core';
-import { Addresses } from './addresses';
+import { Addresses } from './constants/addresses';
 import { NUB } from './nub';
 
 export class Transaction {

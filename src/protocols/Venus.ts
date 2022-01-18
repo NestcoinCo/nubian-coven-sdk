@@ -1,6 +1,6 @@
 import NUB from "..";
-import { Abi } from "../abi";
-import { Addresses } from "../addresses";
+import { Abi } from "../constants/abi";
+import { Addresses } from "../constants/addresses";
 
 export default class Venus {
 
