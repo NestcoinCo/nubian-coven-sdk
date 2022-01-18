@@ -98,18 +98,20 @@ export default class PancakeV2 {
 
     const getPairs = async (token: string, bases: string[], order?: ORDER ) => {
       const pairs: [string, string][] = [];
-      for(let base of bases){
+      for(const base of bases){
         if(base === token) continue;
           const address = await this.factory.methods.getPair(token, base).call();
+          // tslint:disable-next-line:no-unused-expression
           address !== Addresses.genesis && pairs.push(order === ORDER.IN ? [token, base]: [base, token]);
       }
       return pairs;
     }
 
-    let directPair = (await getPairs(_tokenIn, [_tokenOut], ORDER.IN))[0];
+    const directPair = (await getPairs(_tokenIn, [_tokenOut], ORDER.IN))[0];
 
     const routes: string[][] = [];
     // single-hop route
+    // tslint:disable-next-line:no-unused-expression
     directPair && routes.push(directPair);
     
     // two-hop routes
@@ -134,6 +136,7 @@ export default class PancakeV2 {
           try{
             const pair = (await 
             getPairs(BASES_TO_CHECK_TRADES_AGAINST[i], [BASES_TO_CHECK_TRADES_AGAINST[j]]))[0];
+            // tslint:disable-next-line:no-unused-expression
             pair && intermediatePairs.push(pair);
           }
           catch(err){
@@ -160,9 +163,9 @@ export default class PancakeV2 {
       })
     };
 
-    const getOptimalOutcome = async (routes: string[][]) => {
+    const getOptimalOutcome = async (_routes: string[][]) => {
       let bestOutcome: [string, string[]] = ["0", []];
-      for(let route of routes){
+      for(const route of _routes){
         const tokenContract = new this.nub.web3.eth.Contract(this.ERC20_ABI, _tokenIn);
         const tokenDecimals = await tokenContract.methods.decimals().call();
         try{

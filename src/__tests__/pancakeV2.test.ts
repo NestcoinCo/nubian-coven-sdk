@@ -1,301 +1,310 @@
-// const Web3 = require("web3");
-// import {  } from 'web3-core';
-// import { getGasPrice } from "./utils";
-// // import { Console, log } from "console";
-// import NUB from "..";
-// import { Addresses } from "../constants/addresses";
-// import { Abi } from "../constants/abi";
-// require('dotenv').config();
-// import { BigNumber } from "bignumber.js";
+const Web3 = require("web3");
+import {  } from 'web3-core';
+import axios from "axios";
+// import { Console, log } from "console";
+import NUB from "..";
+import { Addresses } from "../constants/addresses";
+import { Abi } from "../constants/abi";
+require('dotenv').config();
+import { BigNumber } from "bignumber.js";
 
-// let web3: any;
-// let nub: NUB;
-// let user: string;
-// // const {abi:
-// // } = constants;
-// const {pancakeswap: {v2: {lpToken: LP_ABI} }} = Abi;
-// const {tokens: {chains: {56: {BNB: TokenA, PRED: TokenB, BUSD_PRED_LP: LP}}},
-//   core: {56: {versions: {2: {wizard}}}}} = Addresses;
-// const {tokens: {chains: {56: {BNB}}}} = Addresses
-// let tokenA: any, tokenB: any, lpToken: any;
+let web3: any;
+let nub: NUB;
+let user: string;
+const {pancakeswap: {v2: {lpToken: LP_ABI} }} = Abi;
+const {tokens: {chains: {56: {BNB: TokenA, PRED: TokenB, BUSD_PRED_LP: LP}}},
+  core: {56: {versions: {2: {wizard}}}}} = Addresses;
+const {tokens: {chains: {56: {BNB, WBNB}}}} = Addresses
+let tokenA: any, tokenB: any, lpToken: any;
 
-// // amounts
-// const [ amountA, amountB, LPamount ] = ["000002160000000000", "1800000000000000000", "065337351229019145"];
-// const maxUint256 = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+// amounts
+const [ amountA, amountB, LPamount ] = ["000002160000000000", "1800000000000000000", "065337351229019145"];
+const maxUint256 = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
-// beforeAll(() => {
-//   web3 = new Web3(new Web3.providers.HttpProvider("https://bsc-dataseed.binance.org/"));
-//   nub = new NUB({
-//     web3: web3,
-//     mode: 'node',
-//     privateKey: process.env.PRIVATE_KEY || "",
-//   });
+async function getGasPrice() {
+    try{
+        let response = await axios.get(`https://owlracle.info/gas?apikey=${process.env.BSCGAS_API_KEY}`);
+        return response.data.fast.toString();
+    }catch(err){
+        console.log(err);
+    }
+    return "5";
+}
 
-//   user = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY).address;
-//   tokenA = new web3.eth.Contract(LP_ABI, TokenA);
-//   tokenB = new web3.eth.Contract(LP_ABI, TokenB);
-//   lpToken = new web3.eth.Contract(LP_ABI, LP);
-// })
+export default getGasPrice;
 
-// describe("Pancakeswap", () => {
+beforeAll(() => {
+  web3 = new Web3(new Web3.providers.HttpProvider("https://bsc-dataseed.binance.org/"));
+  nub = new NUB({
+    web3: web3,
+    mode: 'node',
+    privateKey: process.env.PRIVATE_KEY || "",
+  });
 
-  // test("Pancakeswap Route", async () => {
-  //   const outcome = await nub.pancakeswap.getRoute("0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "0xac51066d7bec65dc4589368da368b212745d63e8");
-  //   console.log(outcome)
-  // });
+  user = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY).address;
+  tokenA = new web3.eth.Contract(LP_ABI, TokenA);
+  tokenB = new web3.eth.Contract(LP_ABI, TokenB);
+  lpToken = new web3.eth.Contract(LP_ABI, LP);
+})
 
-    //swap 
-    // test("Pancakeswap Swap", async () => {
-    //   const slippage_In_percent = 0.02; 
-    //   const unitAmt = new BigNumber(amountB).div(amountA).times(10**18).toFixed(0);
-    //   const slippage = (new BigNumber(10**18)).times(slippage_In_percent);
-    //   const route = (await nub.pancakeswap.getRoute(TokenA, TokenB))[1];
+xdescribe("Pancakeswap", () => {
 
-    //   //approve tokens
-    //   if(TokenA !== BNB){
-    //     let approved = await tokenA.methods.allowance(user, wizard).call();
-    //     if(approved < Number(amountA) ){
-    //       await nub.erc20.approve({token: TokenA, gasPrice: web3.utils.toWei(await getGasPrice(), "gwei")});
-    //     }
-    //   }
-    //   if(TokenB !== BNB){
-    //     let approved = await tokenB.methods.allowance(user, wizard).call();
-    //     if(approved < Number(amountB)){
-    //       await nub.erc20.approve( { token: TokenB, gasPrice: web3.utils.toWei(await getGasPrice(), "gwei") } );
-    //     }
-    //   }
+  test("Pancakeswap Route", async () => {
+    const outcome = await nub.pancakeswap.getRoute("0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "0xac51066d7bec65dc4589368da368b212745d63e8");
+    console.log(outcome)
+  });
 
+    test("Pancakeswap Swap", async () => {
+      const slippage_In_percent = 0.02; 
+      const unitAmt = new BigNumber(amountB).div(amountA).times(10**18).toFixed(0);
+      const slippage = (new BigNumber(10**18)).times(slippage_In_percent);
+      const route = (await nub.pancakeswap.getRoute(TokenA, TokenB))[1];
 
-    //   let spells = nub.Spell();
-    //   // deposit in Wizard
-    //   spells.add({
-    //     connector: "BASIC-A",
-    //     method: "deposit",
-    //     args: [
-    //       TokenA,
-    //       amountA,
-    //       0,
-    //       0
-    //     ]
-    //   });
-
-    //   console.log(route);
-    //   // sell tokens in Pancakeswap
-    //   spells.add({
-    //     connector: "Pancake",
-    //     method: "sell",
-    //     args: [
-    //       route,
-    //       amountA,
-    //       1,
-    //       0,
-    //       0
-    //     ]
-    //   });  
-
-    //   // withdraw token from Wizard
-    //   spells.add({
-    //     connector: "BASIC-A",
-    //     method: "withdraw",
-    //     args: [
-    //       TokenB,
-    //       maxUint256,
-    //       user, // address to receive lpTokens
-    //       0,
-    //       0
-    //     ]
-    //   })
-
-    //   const value = TokenA === BNB ? amountA : 0;
-    //   const txHash = await spells.cast({
-    //     gasPrice: web3.utils.toWei(await getGasPrice(), "gwei"), 
-    //     value
-    //   });
-    //   console.log(txHash);
-    //   expect(txHash).toBeDefined();
-    // })
-
-//   //deposit PRED/BUSD
-//   xtest("Pancakeswap Deposit", async () => {
-//     const slippage_In_percent = 0.02; 
-//     const unitAmt = new BigNumber(amountB).div(amountA).times(10**18).toFixed(0);
-//     const slippage = (new BigNumber(10**18)).times(slippage_In_percent);
-
-//     //approve tokens
-//     if(TokenA !== BNB){
-//       let approved = await tokenA.methods.allowance(user, Wizard).call();
-//       if(approved < Number(amountA) ){
-//         await nub.erc20.approve({token: TokenA, gasPrice: web3.utils.toWei(await getGasPrice(), "gwei")});
-//       }
-//     }
-//     if(TokenB !== BNB){
-//       let approved = await tokenB.methods.allowance(user, Wizard).call();
-//       if(approved < Number(amountB)){
-//         await nub.erc20.approve( { token: TokenB, gasPrice: web3.utils.toWei(await getGasPrice(), "gwei") } );
-//       }
-//     }
+      //approve tokens
+      if(TokenA !== BNB){
+        let approved = await tokenA.methods.allowance(user, wizard).call();
+        if(approved < Number(amountA) ){
+          await nub.erc20.approve({token: TokenA, gasPrice: web3.utils.toWei(await getGasPrice(), "gwei")});
+        }
+      }
+      if(TokenB !== BNB){
+        let approved = await tokenB.methods.allowance(user, wizard).call();
+        if(approved < Number(amountB)){
+          await nub.erc20.approve( { token: TokenB, gasPrice: web3.utils.toWei(await getGasPrice(), "gwei") } );
+        }
+      }
 
 
-//     let spells = nub.Spell();
-//     // deposit in Wizard
-//     spells.add({
-//       connector: "BASIC-A",
-//       method: "deposit",
-//       args: [
-//         TokenA,
-//         amountA,
-//         0,
-//         0
-//       ]
-//     });
+      let spells = nub.Spell();
+      // deposit in Wizard
+      spells.add({
+        connector: "BASIC-A",
+        method: "deposit",
+        args: [
+          TokenA,
+          amountA,
+          0,
+          0
+        ]
+      });
 
-//     // deposit in Wizard
-//     spells.add({
-//       connector: "BASIC-A",
-//       method: "deposit",
-//       args: [
-//         TokenB,
-//         amountB,
-//         0,
-//         0
-//       ]
-//     });
+      console.log(route);
+      // sell tokens in Pancakeswap
+      spells.add({
+        connector: "Pancake",
+        method: "sell",
+        args: [
+          route,
+          amountA,
+          1,
+          0,
+          0
+        ]
+      });  
 
-//     // deposit tokens in Pancakeswap
-//     spells.add({
-//       connector: "PancakeV2",
-//       method: "deposit",
-//       args: [
-//         TokenA,
-//         TokenB,
-//         maxUint256, // address to receive vBNB
-//         unitAmt,
-//         slippage,
-//         0,
-//         0
-//       ]
-//     })
+      // withdraw token from Wizard
+      spells.add({
+        connector: "BASIC-A",
+        method: "withdraw",
+        args: [
+          TokenB,
+          maxUint256,
+          user, // address to receive lpTokens
+          0,
+          0
+        ]
+      })
 
-//     // withdraw BUSD from Wizard
-//     spells.add({
-//       connector: "BASIC-A",
-//       method: "withdraw",
-//       args: [
-//         TokenB === WBNB ? WBNB : TokenA,
-//         maxUint256,
-//         user, 
-//         0,
-//         0
-//       ]
-//     })
+      const value = TokenA === BNB ? amountA : 0;
+      const txHash = await spells.cast({
+        gasPrice: web3.utils.toWei(await getGasPrice(), "gwei"), 
+        value
+      });
+      console.log(txHash);
+      expect(txHash).toBeDefined();
+    })
 
-//     // withdraw PRED from Wizard
-//     spells.add({
-//       connector: "BASIC-A",
-//       method: "withdraw",
-//       args: [
-//         TokenA === WBNB ? WBNB : TokenA,
-//         maxUint256,
-//         user,
-//         0,
-//         0
-//       ]
-//     })
+  //deposit PRED/BUSD
+  xtest("Pancakeswap Deposit", async () => {
+    const slippage_In_percent = 0.02; 
+    const unitAmt = new BigNumber(amountB).div(amountA).times(10**18).toFixed(0);
+    const slippage = (new BigNumber(10**18)).times(slippage_In_percent);
+
+    //approve tokens
+    if(TokenA !== BNB){
+      let approved = await tokenA.methods.allowance(user, wizard).call();
+      if(approved < Number(amountA) ){
+        await nub.erc20.approve({token: TokenA, gasPrice: web3.utils.toWei(await getGasPrice(), "gwei")});
+      }
+    }
+    if(TokenB !== BNB){
+      let approved = await tokenB.methods.allowance(user, wizard).call();
+      if(approved < Number(amountB)){
+        await nub.erc20.approve( { token: TokenB, gasPrice: web3.utils.toWei(await getGasPrice(), "gwei") } );
+      }
+    }
+
+
+    let spells = nub.Spell();
+    // deposit in Wizard
+    spells.add({
+      connector: "BASIC-A",
+      method: "deposit",
+      args: [
+        TokenA,
+        amountA,
+        0,
+        0
+      ]
+    });
+
+    // deposit in Wizard
+    spells.add({
+      connector: "BASIC-A",
+      method: "deposit",
+      args: [
+        TokenB,
+        amountB,
+        0,
+        0
+      ]
+    });
+
+    // deposit tokens in Pancakeswap
+    spells.add({
+      connector: "PancakeV2",
+      method: "deposit",
+      args: [
+        TokenA,
+        TokenB,
+        maxUint256, // address to receive vBNB
+        unitAmt,
+        slippage,
+        0,
+        0
+      ]
+    })
+
+    // withdraw BUSD from Wizard
+    spells.add({
+      connector: "BASIC-A",
+      method: "withdraw",
+      args: [
+        TokenB === WBNB ? WBNB : TokenA,
+        maxUint256,
+        user, 
+        0,
+        0
+      ]
+    })
+
+    // withdraw PRED from Wizard
+    spells.add({
+      connector: "BASIC-A",
+      method: "withdraw",
+      args: [
+        TokenA === WBNB ? WBNB : TokenA,
+        maxUint256,
+        user,
+        0,
+        0
+      ]
+    })
     
-//     // withdraw lpToken from Wizard
-//     spells.add({
-//       connector: "BASIC-A",
-//       method: "withdraw",
-//       args: [
-//         LP,
-//         maxUint256,
-//         user, // address to receive lpTokens
-//         0,
-//         0
-//       ]
-//     })
+    // withdraw lpToken from Wizard
+    spells.add({
+      connector: "BASIC-A",
+      method: "withdraw",
+      args: [
+        LP,
+        maxUint256,
+        user, // address to receive lpTokens
+        0,
+        0
+      ]
+    })
 
-//     const value = TokenA === BNB ? amountA : ( TokenB === BNB ? amountB : 0 );
-//     const txHash = await spells.cast({
-//       gasPrice: web3.utils.toWei(await getGasPrice(), "gwei"), 
-//       value
-//     });
-//     console.log(txHash);
-//     expect(txHash).toBeDefined();
-//   })
+    const value = TokenA === BNB ? amountA : ( TokenB === BNB ? amountB : 0 );
+    const txHash = await spells.cast({
+      gasPrice: web3.utils.toWei(await getGasPrice(), "gwei"), 
+      value
+    });
+    console.log(txHash);
+    expect(txHash).toBeDefined();
+  })
 
-//   xtest("Pancakeswap Withdrawal", async () => {
-//     const slippage_In_percent = 0.02; 
-//     const amountB_W_Slippage = (new BigNumber(amountB)).minus(new BigNumber(amountB).times(slippage_In_percent));
-//     const amountA_W_Slippage = (new BigNumber(amountA)).minus(new BigNumber(amountA).times(slippage_In_percent));
-//     console.log(amountA_W_Slippage.toString(), amountB_W_Slippage.toString());
-//     const unitBAmt = amountB_W_Slippage.div(LPamount).times(10**18).toFixed(0);
-//     const unitAAmt = amountA_W_Slippage.div(LPamount).times(10**18).toFixed(0);
+  xtest("Pancakeswap Withdrawal", async () => {
+    const slippage_In_percent = 0.02; 
+    const amountB_W_Slippage = (new BigNumber(amountB)).minus(new BigNumber(amountB).times(slippage_In_percent));
+    const amountA_W_Slippage = (new BigNumber(amountA)).minus(new BigNumber(amountA).times(slippage_In_percent));
+    console.log(amountA_W_Slippage.toString(), amountB_W_Slippage.toString());
+    const unitBAmt = amountB_W_Slippage.div(LPamount).times(10**18).toFixed(0);
+    const unitAAmt = amountA_W_Slippage.div(LPamount).times(10**18).toFixed(0);
 
 
-//     let spells = nub.Spell();
+    let spells = nub.Spell();
     
-//     //await nub.erc20.approve( { token: LP, gasPrice: await getGasPrice() });
-//     let approved = await lpToken.methods.allowance(user, Wizard).call();
-//     if(approved < Number(LPamount)){
-//       await nub.erc20.approve({token: LP, gasPrice: web3.utils.toWei(await getGasPrice(), "gwei")});
-//     }
+    //await nub.erc20.approve( { token: LP, gasPrice: await getGasPrice() });
+    let approved = await lpToken.methods.allowance(user, wizard).call();
+    if(approved < Number(LPamount)){
+      await nub.erc20.approve({token: LP, gasPrice: web3.utils.toWei(await getGasPrice(), "gwei")});
+    }
 
-//     spells.add({
-//       connector: "BASIC-A",
-//       method: "deposit",
-//       args: [
-//         LP,
-//         maxUint256,
-//         0,
-//         0
-//       ]
-//     });
+    spells.add({
+      connector: "BASIC-A",
+      method: "deposit",
+      args: [
+        LP,
+        maxUint256,
+        0,
+        0
+      ]
+    });
 
-//     spells.add({
-//       connector: "PancakeV2",
-//       method: "withdraw",
-//       args: [
-//         TokenA,
-//         TokenB,
-//         LPamount,
-//         unitAAmt,
-//         unitBAmt,
-//         0,
-//         [0,0],
-//       ]
-//     })
+    spells.add({
+      connector: "PancakeV2",
+      method: "withdraw",
+      args: [
+        TokenA,
+        TokenB,
+        LPamount,
+        unitAAmt,
+        unitBAmt,
+        0,
+        [0,0],
+      ]
+    })
 
-//     //withdraw BUSD from Wizard
-//     spells.add({
-//       connector: "BASIC-A",
-//       method: "withdraw",
-//       args: [
-//         TokenB,
-//         maxUint256,
-//         user, 
-//         0,
-//         0
-//       ]
-//     })
+    //withdraw BUSD from Wizard
+    spells.add({
+      connector: "BASIC-A",
+      method: "withdraw",
+      args: [
+        TokenB,
+        maxUint256,
+        user, 
+        0,
+        0
+      ]
+    })
 
-//     //withdraw PRED from Wizard
-//     spells.add({
-//       connector: "BASIC-A",
-//       method: "withdraw",
-//       args: [
-//         TokenA,
-//         maxUint256,
-//         user,
-//         0,
-//         0
-//       ]
-//     })
+    //withdraw PRED from Wizard
+    spells.add({
+      connector: "BASIC-A",
+      method: "withdraw",
+      args: [
+        TokenA,
+        maxUint256,
+        user,
+        0,
+        0
+      ]
+    })
 
-//     const txHash = await spells.cast({gasPrice: web3.utils.toWei(await getGasPrice(), "gwei")})
-//     console.log(txHash);
-//     expect(txHash).toBeDefined();
-//   })
-// });
+    const txHash = await spells.cast({gasPrice: web3.utils.toWei(await getGasPrice(), "gwei")})
+    console.log(txHash);
+    expect(txHash).toBeDefined();
+  })
+});
 
 
