@@ -13,15 +13,15 @@ export default class Venus {
     }
 
     async deposit(lpToken: string, poolId: number, amount: number){
-      let from = await this.nubInstance.internal.getAddress();
+      const from = await this.nubInstance.internal.getAddress();
       const resp = await this.contractInstance.methods.deposit(poolId, amount).send({from});
       return resp;
     }
 
     async withdraw(amount: number, poolId: number){
       let resp;
-      let from = await this.nubInstance.internal.getAddress();
-      if(amount == this.nubInstance.maxValue){
+      const from = await this.nubInstance.internal.getAddress();
+      if(amount === this.nubInstance.maxValue){
         resp = await this.contractInstance.methods.withdrawAll(poolId).send({from})
       }else{
         resp = await this.contractInstance.methods.withdraw(poolId, amount).send({from})
@@ -30,10 +30,10 @@ export default class Venus {
 
     async harvest(poolId: number)
     {
-      let from = await this.nubInstance.internal.getAddress();
+      const from = await this.nubInstance.internal.getAddress();
       const amt = await this.contractInstance.methods.pendingAUTO(poolId,from).call({from})
 
-      if (amt != 0) {
+      if (amt !== 0) {
         const resp = await this.contractInstance.methods.withdraw(poolId, 0);
         return resp;
       }
