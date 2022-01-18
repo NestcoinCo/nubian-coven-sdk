@@ -4,8 +4,10 @@
       "module": "commonjs",
       "declaration": true,
       "outDir": "./lib",
-      "strict": true
+      "strict": true,
+      "forceConsistentCasingInFileNames": false
     },
     "include": ["src", "scripts"],
-    "exclude": ["node_modules", "**/__tests__/*"]
+    "exclude": ["node_modules", "**/__tests__/*"],
+    
   }
