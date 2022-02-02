@@ -2,12 +2,12 @@ const Web3 = require("web3");
 import axios from "axios";
 import { log } from "console";
 import NUB from "..";
+import { maxUint256 } from "../constants";
 require('dotenv').config()
 
 let web3;
 let nub: NUB;
 let gasPrice: string = '5000000000';
-let maxValue = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 let BNB_CAKE = "0x0ed7e52944161450477ee417de9cd3a859b14fd0";
 let CAKE_BUSD = "0x804678fa97d91B974ec2af3c843270886528a9E6";
 
@@ -44,12 +44,12 @@ xdescribe("AutoFarm CAKE/BUSD lp Tests", () => {
   xtest("deposit CAKE/BUSD lp", async () => {
 
     //await nub.erc20.approve({ token: CAKE_BUSD, gasPrice, to: nub.autoFarm.autofarmAddress});
-    const tx = await nub.autoFarm.deposit({poolId: "381", amount: maxValue, gasPrice});
+    const tx = await nub.autoFarm.deposit({poolId: "381", amount: maxUint256, gasPrice});
     expect(tx).toBeDefined();
   });
 
   xtest("withdraw CAKE/BUSD lp", async () => {
-    const tx = await nub.autoFarm.withdraw({poolId: "381", gasPrice, amount: maxValue});
+    const tx = await nub.autoFarm.withdraw({poolId: "381", gasPrice, amount: maxUint256});
     expect(tx).toBeDefined();
   });
 

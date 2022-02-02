@@ -3,6 +3,7 @@ import { Abi } from "../constants/abi";
 import { Addresses } from "../constants/addresses";
 import { TransactionConfig } from 'web3-core';
 import { GetTransactionConfigParams } from '../internal';
+import {maxUint256} from "../constants/index";
 
 type AutoFarmParams = {
   poolId: string
@@ -10,7 +11,6 @@ type AutoFarmParams = {
 } & Pick<TransactionConfig, 'from' | 'gas' | 'gasPrice' | 'nonce' | 'to'>;
 
 export default class AutoFarm {
-  readonly maxValue = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
     contractInstance;
     nubInstance: NUB;
@@ -32,7 +32,7 @@ export default class AutoFarm {
       if(!params.poolId){
         throw new Error("Pool Id not specified");
       }
-      if(params.amount === this.maxValue){
+      if(params.amount === maxUint256){
         const poolInfo = await this.contractInstance.methods.poolInfo(params.poolId).call();
         const lpTokenAddress = poolInfo.want; 
         const lpTokenContract = new this.nubInstance.web3.eth.Contract(Abi.basics.erc20, lpTokenAddress);

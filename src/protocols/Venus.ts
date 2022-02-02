@@ -1,6 +1,7 @@
 import NUB from "..";
 import { Abi } from "../constants/abi";
 import { Addresses } from "../constants/addresses";
+import { maxUint256 } from "../constants";
 
 export default class Venus {
 
@@ -21,7 +22,7 @@ export default class Venus {
     async withdraw(amount: number, poolId: number){
       let resp;
       const from = await this.nubInstance.internal.getAddress();
-      if(amount === this.nubInstance.maxValue){
+      if(amount === Number(maxUint256)){
         resp = await this.contractInstance.methods.withdrawAll(poolId).send({from})
       }else{
         resp = await this.contractInstance.methods.withdraw(poolId, amount).send({from})

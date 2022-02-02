@@ -3,10 +3,10 @@ import { NUB } from '../nub';
 import { Addresses } from '../constants/addresses';
 import { TransactionConfig } from 'web3-core';
 import { GetTransactionConfigParams } from '../internal';
+import { maxUint256 } from '../constants';
 
 /**
- * @param {address} _d.token token address or symbol
- * @param {string} _d.amount token amount
+ * @param {string} _d.amount ETH amount
  * @param {address|string} _d.from (optional) token
  * @param {number|string} _d.to (optional)
  * @param {number|string} _d.gasPrice (optional) not optional in "node"
@@ -41,11 +41,12 @@ export class ETH {
   async estimateTransferGas(params: ETHInputParams) {
     const txObj: TransactionConfig = await this.transferTxObj(params);
     const gas = await this.getGas(txObj);
+    const gasPrice = this.nub.web3.eth.getGasPrice()
 
     return {
       gas,
-      price: this.nub.GAS_PRICE,
-      fee: +gas*this.nub.GAS_PRICE
+      price: gasPrice,
+      fee: +gas * +gasPrice,
     }
   }
 
@@ -70,7 +71,7 @@ export class ETH {
     }
 
     let txObj: TransactionConfig;
-    if (['-1', this.nub.maxValue].includes(params.amount)) {
+    if (['-1', Number(maxUint256)].includes(params.amount)) {
       throw new Error("BNB amount cannot be passed as '-1'.");
     }
 
