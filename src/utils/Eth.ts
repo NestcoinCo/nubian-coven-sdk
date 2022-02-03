@@ -18,7 +18,7 @@ type ETHInputParams = {
 } & Pick<TransactionConfig, 'from' | 'gas' | 'gasPrice' | 'nonce' | 'to'>;
 
 /**
- * generic ERC20 token methods
+ * generic ETH methods
  */
 
 export class ETH {

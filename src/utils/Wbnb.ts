@@ -3,7 +3,7 @@ import { Abi } from "../constants/abi";
 import { Addresses } from "../constants/addresses";
 import { TransactionConfig } from 'web3-core';
 import { GetTransactionConfigParams } from "../internal";
-import { maxUint256 } from "../constants";
+import { getTokenAddress, maxUint256 } from "../constants";
 
 
 type WbnbParams = {
@@ -18,7 +18,7 @@ export default class Wbnb {
     {
       this.contractInstance = new nub.web3.eth.Contract(Abi.Wbnb, Addresses.tokens.chains[nub.CHAIN_ID].WBNB);
       this.nub = nub;
-      this.address = Addresses.tokens.chains[this.nub.CHAIN_ID].WBNB;
+      this.address = getTokenAddress("WBNB", this.nub);
     }
 
     async estimateWrapGas(params: WbnbParams){

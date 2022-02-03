@@ -44,17 +44,18 @@ export class NUB {
   origin: string = Addresses.genesis;
   VERSION: 2 = 2;
   CHAIN_ID: ChainId = 56;
-  // value of uint(-1).
 
   readonly config: NUBConfig;
   readonly castHelpers = new CastHelpers(this);
   readonly transaction = new Transaction(this);
 
-  // Initialize Protocols
+  // Protocols
   public autoFarm;
-  public venus;
-  public wbnb;
   public pancakeswap;
+
+  public wbnb;
+  public erc20;
+  public eth;
 
   public encodeSpells = (...args: Parameters<Internal['encodeSpells']>) => this.internal.encodeSpells(...args);
   public sendTransaction = (...args: Parameters<Transaction['send']>) => this.transaction.send(...args);
@@ -62,8 +63,6 @@ export class NUB {
   public estimateCastGas = (...args: Parameters<CastHelpers['estimateGas']>) => {
     return this.castHelpers.estimateGas(...args);
   };
-  public erc20;
-  public eth;
 
   get web3() {
     return this.config.web3;
@@ -93,11 +92,11 @@ export class NUB {
         this.CHAIN_ID = _chainId as ChainId;
       }
     });
+
     this.erc20 = new Erc20(this);
     this.pancakeswap = new PancakeV2(this);
     this.eth = new ETH(this);
     this.autoFarm = new AutoFarm(this);
-    this.venus = new Venus(this);
     this.wbnb = new Wbnb(this);
   }
 
@@ -129,11 +128,11 @@ export class NUB {
           to: Addresses.core[vm.CHAIN_ID].versions[vm.VERSION].implementations
         });
 
-        const price = await this.getCurrentGasPrices(true);
+        const price = await vm.web3.eth.getGasPrice();
         return {
           gas,
           price,
-          fee: gas * price,
+          fee: gas * +price,
         };
       };
 
@@ -151,11 +150,6 @@ export class NUB {
           return;
         }
         return await vm.encodeSpells({ spells: this, ...params });
-      };
-
-      getCurrentGasPrices = async (useFixedPrice: boolean) => {
-        const price = 5000000000;
-        return price;
       };
     })();
   }
@@ -246,11 +240,6 @@ export class NUB {
       .cast(encodedSpells.targets, encodedSpells.spells, params.origin || Addresses.genesis)
       .encodeABI();
 
-    return data;
-  }
-
-  private async getContractData(method: any, ...params: any[]) {
-    const data = method(...params).encodeABI();
     return data;
   }
 }
