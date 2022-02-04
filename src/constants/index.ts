@@ -1,5 +1,6 @@
 import { Addresses } from "./addresses";
 import { NUB } from "../nub";
+import {NestedKeyOf} from "../utils/typeHelper";
 
 const maxUint256 = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
@@ -13,6 +14,10 @@ const getTokenAddress = (
 const getTokenAddresses = (symbols: (keyof typeof Addresses.tokens.chains[56])[], nub: NUB): string[] => {
   return symbols.map((symbol) => getTokenAddress(symbol, nub));
 }
+
+// const getProtocolAddress = (path: NestedKeyOf<typeof Addresses>) => {
+//   return Addresses[path]
+// }
 
 export {
   Addresses,
