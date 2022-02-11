@@ -6,6 +6,7 @@ import * as Math from './math';
 import { TransactionConfig } from 'web3-core';
 import { GetTransactionConfigParams } from '../internal';
 import { Contract } from 'web3-eth-contract';
+import { maxUint256 } from "../constants";
 
 /**
  * @param {address} _d.token token address or symbol
@@ -26,7 +27,6 @@ type Erc20InputParams = {
  */
 
 export class Erc20 {
-  readonly maxValue = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
   constructor(private nub: NUB) {}
 
@@ -45,11 +45,12 @@ export class Erc20 {
   async estimateTransferGas(params: Erc20InputParams){
     const txObj: TransactionConfig = await this.transferTxObj(params);
     const gas = await this.getGas(txObj);
+    const gasPrice = this.nub.web3.eth.getGasPrice()
 
     return {
       gas,
-      price: this.nub.GAS_PRICE,
-      fee: +gas*this.nub.GAS_PRICE
+      price: gasPrice,
+      fee: +gas * +gasPrice,
     }
   }
 
@@ -76,7 +77,7 @@ export class Erc20 {
     let txObj: TransactionConfig;
 
     if (['eth', TokenInfo.eth.address].includes(params.token.toLowerCase())) {
-      if (['-1', this.nub.maxValue].includes(params.amount)) {
+      if (['-1', Number(maxUint256)].includes(params.amount)) {
         throw new Error("BNB amount value cannot be passed as '-1'.");
       }
 
@@ -94,7 +95,7 @@ export class Erc20 {
       params.to = this.nub.internal.filterAddress(params.token);
       const contract: Contract = new this.nub.web3.eth.Contract(Abi.basics.erc20, params.to);
 
-      if (['-1', this.nub.maxValue].includes(params.amount)) {
+      if (['-1', Number(maxUint256)].includes(params.amount)) {
         await contract.methods
           .balanceOf(params.from)
           .call()
@@ -131,11 +132,12 @@ export class Erc20 {
   async estimateApproveGas(params: Erc20InputParams){
     const txObj: TransactionConfig = await this.approveTxObj(params);
     const gas = await this.getGas(txObj);
-    
+    const gasPrice = this.nub.web3.eth.getGasPrice()
+
     return {
       gas,
-      price: this.nub.GAS_PRICE,
-      fee: +gas * this.nub.GAS_PRICE
+      price: gasPrice,
+      fee: +gas * +gasPrice,
     }
   }
 
@@ -150,7 +152,7 @@ export class Erc20 {
       params.from = await this.nub.internal.getAddress();
     }
     if (!params.amount) {
-      params.amount = this.maxValue ;
+      params.amount = maxUint256 ;
     }
 
     let txObj: TransactionConfig;

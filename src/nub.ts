@@ -15,6 +15,7 @@ import { Transaction } from './transaction';
 import { wrapIfSpells, ETH } from './utils';
 import { Erc20 } from './utils/Erc20';
 import { AutoFarm, Venus, PancakeV2, Wbnb } from './protocols';
+import {maxUint256} from "./constants/index";
 
 type NUBConfig =
   | {
@@ -43,18 +44,18 @@ export class NUB {
   origin: string = Addresses.genesis;
   VERSION: 2 = 2;
   CHAIN_ID: ChainId = 56;
-  GAS_PRICE: number = 5000000000;
-  // value of uint(-1).
-  public readonly maxValue = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
 
   readonly config: NUBConfig;
   readonly castHelpers = new CastHelpers(this);
   readonly transaction = new Transaction(this);
 
-  // Initialize Protocols
+  // Protocols
   public autoFarm;
-  public venus;
+  public pancakeswap;
+
   public wbnb;
+  public erc20;
+  public eth;
 
   public encodeSpells = (...args: Parameters<Internal['encodeSpells']>) => this.internal.encodeSpells(...args);
   public sendTransaction = (...args: Parameters<Transaction['send']>) => this.transaction.send(...args);
@@ -62,9 +63,6 @@ export class NUB {
   public estimateCastGas = (...args: Parameters<CastHelpers['estimateGas']>) => {
     return this.castHelpers.estimateGas(...args);
   };
-  public erc20;
-  public pancakeswap;
-  public eth;
 
   get web3() {
     return this.config.web3;
@@ -94,11 +92,11 @@ export class NUB {
         this.CHAIN_ID = _chainId as ChainId;
       }
     });
+
     this.erc20 = new Erc20(this);
     this.pancakeswap = new PancakeV2(this);
     this.eth = new ETH(this);
     this.autoFarm = new AutoFarm(this);
-    this.venus = new Venus(this);
     this.wbnb = new Wbnb(this);
   }
 
@@ -130,11 +128,11 @@ export class NUB {
           to: Addresses.core[vm.CHAIN_ID].versions[vm.VERSION].implementations
         });
 
-        const price = await this.getCurrentGasPrices(true);
+        const price = await vm.web3.eth.getGasPrice();
         return {
           gas,
           price,
-          fee: gas * price,
+          fee: gas * +price,
         };
       };
 
@@ -152,11 +150,6 @@ export class NUB {
           return;
         }
         return await vm.encodeSpells({ spells: this, ...params });
-      };
-
-      getCurrentGasPrices = async (useFixedPrice: boolean) => {
-        const price = 5000000000;
-        return price;
       };
     })();
   }
@@ -210,7 +203,7 @@ export class NUB {
     const contract = new this.web3.eth.Contract(Abi.basics.erc20, tokenAddress);
     const from = await this.internal.getAddress();
     const resp = await contract.methods
-      .approve(Addresses.core[this.CHAIN_ID].versions[this.VERSION].implementations, this.maxValue)
+      .approve(Addresses.core[this.CHAIN_ID].versions[this.VERSION].implementations, maxUint256)
       .send({ from });
     return resp;
   }
@@ -218,8 +211,9 @@ export class NUB {
   public async estimateGasForTokenTransfer(tokenAddress: string, receiver: string, amount: number) {
     const contract = new this.web3.eth.Contract(Abi.basics.erc20, tokenAddress);
     const from = await this.internal.getAddress();
-    const gas = await contract.methods.transfer(receiver, amount).estimateGas({ gasPrice: this.GAS_PRICE, from });
-    return {gas, price: this.GAS_PRICE, fee: gas * this.GAS_PRICE};
+    const gasPrice = await this.web3.eth.getGasPrice();
+    const gas = await contract.methods.transfer(receiver, amount).estimateGas({ gasPrice, from });
+    return {gas, price: gasPrice, fee: gas * +gasPrice};
   }
 
   public async transferToken(tokenAddress: string, receiver: string, amount: number) {
@@ -246,11 +240,6 @@ export class NUB {
       .cast(encodedSpells.targets, encodedSpells.spells, params.origin || Addresses.genesis)
       .encodeABI();
 
-    return data;
-  }
-
-  private async getContractData(method: any, ...params: any[]) {
-    const data = method(...params).encodeABI();
     return data;
   }
 }

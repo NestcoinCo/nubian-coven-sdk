@@ -1,45 +1,44 @@
 import { NUB } from '../nub';
 import { Abi } from '../constants/abi';
-import { Addresses } from '../constants/addresses';
+import { Addresses, getTokenAddresses } from '../constants';
 import { AbiItem } from "web3-utils";
 import BigNumber from "bignumber.js";
 
 import { BASES_TO_CHECK_TRADES_AGAINST } from '../constants/swapConstants';
 
-/**
- * generic ERC20 token methods
- */
-
 enum ORDER{
   IN,
   OUT
-}
+};
+
 export default class PancakeV2 {
   private version:2 = 2;
-  // addresses
-  public WBNB_A: string = Addresses.tokens.chains[this.nub.CHAIN_ID].WBNB;
-  public BNB_A: string = Addresses.tokens.chains[this.nub.CHAIN_ID].BNB;
-  public BUSD_A: string = Addresses.tokens.chains[this.nub.CHAIN_ID].BUSD;
-  public ROUTER02_A: string = 
-    Addresses.protocols.pancakeswap.chains[this.nub.CHAIN_ID].versions[this.version].ROUTER02;
-  public FACTORY_A: string = "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73";
 
-    // Addresses.protocols.pancakeswap.chains[this.nub.CHAIN_ID].versions[this.version];
+  // addresses
+  WBNB_A: string;
+  BNB_A: string;
+  BUSD_A: string;
+  ROUTER02_A: string = 
+    Addresses.protocols.pancakeswap.chains[this.nub.CHAIN_ID].versions[this.version].ROUTER02;
+  FACTORY_A: string = 
+    Addresses.protocols.pancakeswap.chains[this.nub.CHAIN_ID].versions[this.version].FACTORY;
   
   // abis
-  public ROUTER02_ABI: AbiItem[] = Abi.pancakeswap.v2.router02;
-  public ERC20_ABI: AbiItem[] = Abi.basics.erc20;
-  public FACTORY_ABI: AbiItem[] = Abi.pancakeswap.v2.factory;
+  ROUTER02_ABI: AbiItem[] = Abi.pancakeswap.v2.router02;
+  ERC20_ABI: AbiItem[] = Abi.basics.erc20;
+  FACTORY_ABI: AbiItem[] = Abi.pancakeswap.v2.factory;
 
   // contracts
-  public router = new this.nub.web3.eth.Contract(this.ROUTER02_ABI, 
+  router = new this.nub.web3.eth.Contract(this.ROUTER02_ABI, 
     this.ROUTER02_A
   );
-  public factory = new this.nub.web3.eth.Contract(this.FACTORY_ABI, 
+  factory = new this.nub.web3.eth.Contract(this.FACTORY_ABI, 
     this.FACTORY_A
   );
 
-  constructor(private nub: NUB) {}
+  constructor(private nub: NUB) {
+    [this.WBNB_A, this.BNB_A, this.BUSD_A] = getTokenAddresses(["WBNB", "BNB", "BUSD"], this.nub)
+  }
 
   /**
    * @param {address} _d.address address
