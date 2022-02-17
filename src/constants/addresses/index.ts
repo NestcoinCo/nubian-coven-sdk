@@ -11,6 +11,7 @@ import { TOKENS as TOKENS_TESTNET  } from './testnet/tokens';
 
 export const Addresses = {
   genesis: '0x0000000000000000000000000000000000000000',
+  bnb: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
   core,
   connectors: {
     chains: {
@@ -24,13 +25,19 @@ export const Addresses = {
           2: connectorsV2_M1_Mainnet,
         },
       },
+      31337: {
+        versions: {
+          2: connectorsV2_M1_Mainnet,
+        },
+      },
     },
   },
   protocols,
   tokens: {
     chains: {
       97: TOKENS_TESTNET,
-      56: TOKENS_MAINNET
+      56: TOKENS_MAINNET,
+      31337: TOKENS_MAINNET,
     }
   }
 };

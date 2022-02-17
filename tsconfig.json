@@ -7,7 +7,8 @@
       "strict": true,
       "forceConsistentCasingInFileNames": false
     },
-    "include": ["src", "scripts"],
-    "exclude": ["node_modules", "**/__tests__/*"],
-    
+    "include": ["src", "scripts", "src/__tests__/*"],
+    "exclude": ["node_modules", ],
+    "esModuleInterop": true,
+    "resolveJsonModule": true
   }

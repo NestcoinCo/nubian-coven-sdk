@@ -9,7 +9,7 @@ import { core } from './core';
 import { read } from './read';
 
 import { AutoFarm } from './protocols/autofarm';
-import { Venus } from './protocols/venus';
+import * as Venus from './protocols/Venus';
 import { Wbnb } from './protocols/wbnb';
 import { pancakeswap } from './protocols/pancakeswap';
 

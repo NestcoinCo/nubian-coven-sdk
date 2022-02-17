@@ -1,4 +1,5 @@
-require('@nomiclabs/hardhat-ethers');
+import "@nomiclabs/hardhat-ethers";
+import "@nomiclabs/hardhat-waffle";
 require('dotenv').config();
 
 const { utils } = require('ethers');
@@ -46,7 +47,7 @@ module.exports = {
     },
     hardhat: {
       forking: {
-        url: process.env.ANKR_KEY,
+        url: process.env.MORALIS_KEY,
       },
       blockGasLimit: 12000000,
     },
