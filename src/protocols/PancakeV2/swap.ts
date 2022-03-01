@@ -49,7 +49,7 @@ async function swap(this: PancakeV2, params: SwapParams){
 
   const _amountA = new BigNumber(amountA).times(10 ** await TokenA.decimals());
   const _amountB = new BigNumber(amountB).times(10 ** await TokenB.decimals());
-  const [buyDecimal, sellDecimal] = [await TokenB.decimals(), await TokenA.decimals()]
+  const [buyDecimal, sellDecimal] = [+(await TokenB.decimals()), +(await TokenA.decimals())]
   const amountB_W_Slippage = (new BigNumber(_amountB)).minus(new BigNumber(_amountB).times(slippage));
   const unitAmt = amountB_W_Slippage.div(_amountA).times(10**(18-buyDecimal+sellDecimal)).toFixed(0);
 
