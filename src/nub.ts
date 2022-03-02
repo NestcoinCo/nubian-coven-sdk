@@ -14,7 +14,7 @@ import { Spells } from './spells';
 import { Transaction } from './transaction';
 import { wrapIfSpells, ETH } from './utils';
 import { Erc20 } from './utils/Erc20';
-import { AutoFarm, Venus, PancakeV2, Wbnb } from './protocols';
+import { Venus, PancakeV2, Wbnb } from './protocols';
 import {maxUint256} from "./constants/index";
 
 type NUBConfig =
@@ -50,7 +50,6 @@ export class NUB {
   readonly transaction = new Transaction(this);
 
   // Protocols
-  public autoFarm;
   public pancakeswap;
   public venus;
 
@@ -82,7 +81,6 @@ export class NUB {
     this.CHAIN_ID = chainId;
     this.config = getNUBConfig(config);
     this.config.web3.eth.getChainId().then((_chainId) => {
-      console.log(process.env.NODE_ENV, _chainId)
       if (process.env.NODE_ENV !== "test" && this.CHAIN_ID !== _chainId) {
         throw new Error(
           `chainId doesn't match with the web3. Initiate 'nub' like this: 'const nub = new NUB(web3, chainId)'`,
@@ -99,7 +97,6 @@ export class NUB {
     this.pancakeswap = new PancakeV2(this);
     this.venus = new Venus(this);
     this.eth = new ETH(this);
-    this.autoFarm = new AutoFarm(this);
     this.wbnb = new Wbnb(this);
   }
 
