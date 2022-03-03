@@ -1,6 +1,5 @@
 import { Addresses } from "./addresses";
 import { NUB } from "../nub";
-import {NestedKeyOf} from "../utils/typeHelper";
 
 const maxUint256 = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 

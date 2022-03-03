@@ -1,10 +1,12 @@
 const Web3 = require("web3");
+import BigNumber from "bignumber.js";
+import { Console } from "console";
 import NUB from "..";
 import { Addresses, getTokenAddress } from "../constants";
+import Bnb from "../protocols/utils/Bnb";
 import Erc20 from "../protocols/utils/Erc20";
 import { tokenMapping, vTokenMapping } from "../protocols/utils/venusMapping";
 import VToken from "../protocols/utils/VToken";
-import { ensureAllowance } from "./pancakeV2.test";
 require('dotenv').config()
 
 let web3: typeof Web3;
@@ -21,9 +23,18 @@ beforeAll(() => {
   user = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY).address;
 })
 
+export const ensureAllowance = async (Tokens: ( Bnb|Erc20|VToken )[], owner: string, spender: string, amounts: (string|number)[]) => {
+  for ( let i = 0; i < Tokens.length; i++){
+    const token = Tokens[i];
+    if(token instanceof Bnb) return;
+    if ( await token.allowance(owner, spender) > amounts[i]) return;
+    await token.approve(spender);
+  }
+}
+
 describe("Venus", () => {
 
-  xtest("Deposit", async () => {
+  test("Deposit", async () => {
     const amount = 1;
     const token = getTokenAddress("USDT", nub);
 
@@ -38,7 +49,7 @@ describe("Venus", () => {
       [Token], 
       user, 
       Addresses.core[nub.CHAIN_ID].versions[2].implementations, 
-      [amount * 10**(+Token.decimals())]
+      [new BigNumber(10).pow(await Token.decimals()).times(amount).toNumber()]
     );
 
     const tx = await nub.venus.deposit({
@@ -49,16 +60,17 @@ describe("Venus", () => {
 
     const tokenBalanceAfter = await Token.balanceOf(user);
     const vTokenBalanceAfter = await _VToken.balanceOf(user);
-
-    expect(vTokenBalanceAfter-vTokenBalanceBefore).toBeGreaterThan(0);
-    expect(tokenBalanceBefore-tokenBalanceAfter).toEqual(amount * 10**await Token.decimals());
+    expect(new BigNumber(vTokenBalanceAfter).minus(vTokenBalanceBefore).toNumber())
+      .toBeGreaterThan(0);
+    expect(new BigNumber(tokenBalanceBefore).minus(tokenBalanceAfter).toNumber())
+      .toEqual(new BigNumber(10).pow(await Token.decimals()).times(amount).toNumber());
 
     expect(tx?.status).toBeTruthy;
   });
 
-  xtest("Withdraw with vTokenAmount", async () => {
+  test("Withdraw with vToken Amount", async () => {
     const vTokenAddress = vTokenMapping["USDT-A"];
-    const vTokenAmount = 141.021;
+    const vTokenAmount = 40;
 
     const key = Object.entries(vTokenMapping).filter(([key, value]) => value === vTokenAddress)[0][0] as keyof typeof tokenMapping;
     const _VToken = new VToken(vTokenAddress, nub.web3);
@@ -71,7 +83,7 @@ describe("Venus", () => {
       [_VToken], 
       user, 
       Addresses.core[nub.CHAIN_ID].versions[2].implementations, 
-      [ vTokenAmount * 10**(+_VToken.decimals()) ]
+      [ new BigNumber(10).pow(await _VToken.decimals()).times(vTokenAmount).toNumber()]
     );
 
     const tx = await nub.venus.withdraw({
@@ -83,8 +95,45 @@ describe("Venus", () => {
     const tokenBalanceAfter = await Token.balanceOf(user);
     const vTokenAfter = await _VToken.balanceOf(user);
 
-    expect(vTokenBefore-vTokenAfter).toEqual(vTokenAmount*10**8);
-    expect(tokenBalanceAfter-tokenBalanceBefore).toBeGreaterThan(0);
+    expect(new BigNumber(vTokenBefore).minus(vTokenAfter).toNumber())
+      .toEqual(new BigNumber(10).pow(8).times(vTokenAmount).toNumber());
+    expect(new BigNumber(tokenBalanceAfter).minus(tokenBalanceBefore).toNumber())
+      .toBeGreaterThan(0);
+
+    expect(tx?.status).toBeTruthy;
+  })
+
+  test("Withdraw with Token Amount", async () => {
+    const vTokenAddress = vTokenMapping["USDT-A"];
+    const tokenAmount = 1;
+
+    const key = Object.entries(vTokenMapping).filter(([key, value]) => value === vTokenAddress)[0][0] as keyof typeof tokenMapping;
+    const _VToken = new VToken(vTokenAddress, nub.web3);
+    const Token = new Erc20(tokenMapping[key], nub.web3);
+
+    const tokenBalanceBefore = await Token.balanceOf(user);
+    const vTokenBefore = await _VToken.balanceOf(user);
+
+    ensureAllowance(
+      [Token], 
+      user, 
+      Addresses.core[nub.CHAIN_ID].versions[2].implementations, 
+      [ new BigNumber(10).pow(await Token.decimals()).times(tokenAmount).toNumber() ]
+    );
+
+    const tx = await nub.venus.withdraw({
+      vTokenAddress,
+      tokenAmount,
+       gasPrice: await nub.web3.eth.getGasPrice()
+    }) as unknown as { status: boolean};
+
+    const tokenBalanceAfter = await Token.balanceOf(user);
+    const vTokenAfter = await _VToken.balanceOf(user);
+
+    expect(new BigNumber(vTokenBefore).minus(vTokenAfter).toNumber())
+      .toBeGreaterThan(0);
+    expect(new BigNumber(tokenBalanceAfter).minus(tokenBalanceBefore).toNumber())
+      .toEqual(new BigNumber(10).pow(await Token.decimals()).times(tokenAmount).toNumber());
 
     expect(tx?.status).toBeTruthy;
   })

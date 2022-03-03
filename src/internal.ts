@@ -101,7 +101,7 @@ export class Internal {
     params: { connector: Connector; method: string; args: string[] },
     version: Version = this.nub.VERSION,
   ) => {
-    console.log('Params', params);
+    // console.log('Params', params);
 
     // type check that object has the required properties
     if (!(hasKey(Abi.connectors.versions, version) && hasKey(Abi.connectors.versions[version], params.connector))) {
@@ -111,7 +111,7 @@ export class Internal {
     // Abi.connectors.versions[version]
     const connectorInterface = this.getInterface(Abi.connectors.versions[version][params.connector], params.method);
 
-    console.log('Interface', connectorInterface);
+    // console.log('Interface', connectorInterface);
 
     if (!connectorInterface) throw new Error(`ConnectorInterface '${params.method}' not found`);
     return this.nub.web3.eth.abi.encodeFunctionCall(connectorInterface, params.args);
@@ -126,7 +126,7 @@ export class Internal {
    */
   encodeSpells = (params: Spells | { spells: Spells }, version: Version = this.nub.VERSION) => {
     const spells = this.nub.castHelpers.flashBorrowSpellsConvert(this.getSpells(params));
-    console.log('Spells: ', spells);
+    // console.log('Spells: ', spells);
     // Convert the spell.connector into required version. Eg: compound => COMPOUND-A for NUBv2
     spells.data = spells.data.map((spell) =>
       Number(version) === 1
@@ -216,7 +216,7 @@ export class Internal {
    */
   estimateGas = async (params: EstimateGasParams) => {
     const data = this.nub.web3.eth.abi.encodeFunctionCall(params.abi, params.args);
-    console.log('estimate Params', params);
+    // console.log('estimate Params', params);
     try {
       const estimatedGas = await this.nub.web3.eth.estimateGas({
         from: params.from,

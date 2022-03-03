@@ -1,3 +1,4 @@
+import BigNumber from "bignumber.js";
 import Web3 from "web3";
 import { Abi } from "../../constants/abi";
 import Erc20 from "./Erc20";
@@ -16,20 +17,20 @@ class VToken extends Erc20{
     return this.contract.methods.balanceOf(address).call();
   }
 
-  async getTokens(amount: string | number, underlyingDecimals:string){
+  async getTokens(amount: string | number, underlyingDecimals:string): Promise<number>{
     const oneVTokenInUnderlying = await this.getOneVTokenInUnderlying(underlyingDecimals);
-    return +amount * oneVTokenInUnderlying;
+    return new BigNumber(amount).times(oneVTokenInUnderlying).toNumber();
   }
 
-  async getOneVTokenInUnderlying(underlyingDecimals:string){
+  async getOneVTokenInUnderlying(underlyingDecimals:string): Promise<number>{
     const mantissa = 18 + parseInt(underlyingDecimals) - 8;
     const exchangeRate = await this.exchangeRate();
-    return exchangeRate / Math.pow(10, mantissa);
+    return new BigNumber(exchangeRate).div(Math.pow(10, mantissa)).toNumber();
   }
 
-  async getVTokens(amount: string | number, underlyingDecimals:string){
+  async getVTokens(amount: string | number, underlyingDecimals:string): Promise<number>{
     const oneVTokenInUnderlying = await this.getOneVTokenInUnderlying(underlyingDecimals);
-    return +amount / oneVTokenInUnderlying;
+    return new BigNumber(amount).div(oneVTokenInUnderlying).toNumber();
   }
 
   async getCash(){

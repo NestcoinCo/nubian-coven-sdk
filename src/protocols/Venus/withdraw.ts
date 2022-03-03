@@ -38,13 +38,12 @@ async function withdraw(this: Venus, params: WithdrawParams) {
 
   if(!vTokenAmount){
     vTokenAmount = await _VToken.getVTokens(tokenAmount!, String(await Token.decimals()));
-    vTokenAmount = new BigNumber(vTokenAmount).times( 10 ** 8).toString();
+    vTokenAmount = new BigNumber(vTokenAmount).times(new BigNumber(10).pow(8)).toFixed(0);
   }else {
-    vTokenAmount = new BigNumber(vTokenAmount).times( 10 ** 8).toString();
+    vTokenAmount = new BigNumber(vTokenAmount).times(new BigNumber(10).pow(8)).toString();
   }
 
-  tokenAmount = new BigNumber(tokenAmount).times(10 ** await Token.decimals()).toString()
-  console.log(tokenAmount, vTokenAmount);
+  tokenAmount = new BigNumber(tokenAmount).times(new BigNumber(10).pow(await Token.decimals())).toString()
 
   let spells = this.nub.Spell();
 
@@ -60,7 +59,7 @@ async function withdraw(this: Venus, params: WithdrawParams) {
     ]
   })
 
-  // withdraw tokems
+  // withdraw tokens
   spells.add({
     connector: "VenusV2",
     method: "withdraw",

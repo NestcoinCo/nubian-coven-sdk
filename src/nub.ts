@@ -160,16 +160,16 @@ export class NUB {
       from: await this.internal.getAddress(),
       origin: this.origin,
     };
-    console.log('Spells: ', params);
+    //console.log('Spells: ', params);
     const mergedParams = Object.assign(defaults, wrapIfSpells(params)) as CastParams;
 
-    console.log('Merged Params: ', mergedParams);
+    //console.log('Merged Params: ', mergedParams);
     if (!mergedParams.from) throw new Error(`Parameter 'from' is not defined.`);
     if (!mergedParams.to) throw new Error(`Parameter 'to' is not defined.`);
 
     const data = await this.getData(mergedParams);
 
-    console.log('Data: ', data);
+    //console.log('Data: ', data);
 
     const transactionConfig = await this.internal.getTransactionConfig({
       from: mergedParams.from,
@@ -181,11 +181,11 @@ export class NUB {
       data, // Data should be generated using the abi of the implementations contract
     });
 
-    console.log('transactionConfig: ', transactionConfig);
+    //console.log('transactionConfig: ', transactionConfig);
 
     const transaction = await this.transaction.send(transactionConfig);
 
-    console.log('transaction: ', transaction);
+    //console.log('transaction: ', transaction);
 
     return transaction;
   }

@@ -10,7 +10,7 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  defaultNetwork: 'hardhat',
+  defaultNetwork: 'localhost',
   solidity: {
     compilers: [
       {
@@ -38,7 +38,6 @@ module.exports = {
       url: `http://localhost:8545`,
       accounts: [`0x${PRIVATE_KEY}`],
       timeout: 150000,
-      gasPrice: parseInt(utils.parseUnits('132', 'gwei')),
     },
     bscmainnet: {
       url: 'https://bsc-dataseed.binance.org/',
@@ -48,6 +47,7 @@ module.exports = {
     hardhat: {
       forking: {
         url: process.env.MORALIS_KEY,
+        blockNumber: 15730775,
       },
       blockGasLimit: 12000000,
     },

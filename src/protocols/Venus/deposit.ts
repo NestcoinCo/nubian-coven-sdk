@@ -26,7 +26,7 @@ async function deposit(this: Venus, params: DepositParams) {
   let spells = this.nub.Spell();
   const key = Object.entries(tokenMapping).filter(([key, value]) => value === address)[0][0] as keyof typeof tokenMapping;
   const Token = new Erc20(address, this.nub.web3)
-  const _amount = new BigNumber(amount).times(10 ** await Token.decimals())
+  const _amount = new BigNumber(amount).times(new BigNumber(10).pow(await Token.decimals()))
 
   // deposit token in Wizard
   spells.add({
@@ -59,7 +59,7 @@ async function deposit(this: Venus, params: DepositParams) {
     args: [
       vTokenMapping[key],
       maxUint256,
-      address, 
+      receiver, 
       0,
       0
     ]

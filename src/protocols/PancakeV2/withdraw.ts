@@ -32,7 +32,7 @@ async function withdraw(this: PancakeV2, params: WithdrawParams){
   }
   slippage = slippage/100;
   
-  const lpAmount = new BigNumber(amount).times(10**18).toFixed(0);
+  const lpAmount = new BigNumber(amount).times(new BigNumber(10).pow(18)).toFixed(0);
   const LpToken = new this.nub.web3.eth.Contract(Abi.pancakeswap.v2.lpToken, lpToken);
   const tokenA = await LpToken.methods.token0().call();
   const tokenB = await LpToken.methods.token1().call();
@@ -58,8 +58,8 @@ async function withdraw(this: PancakeV2, params: WithdrawParams){
   const amountB_W_Slippage = amountB.minus(new BigNumber(amountB).times(slippage));
   const amountA_W_Slippage = amountA.minus(new BigNumber(amountA).times(slippage));
   const [BDecimal, ADecimal] = [await TokenB.decimals(), await TokenA.decimals()]
-  const unitBAmt = amountB_W_Slippage.div(lpAmount).times(10**(18-BDecimal+18)).toFixed(0);
-  const unitAAmt = amountA_W_Slippage.div(lpAmount).times(10**(18-ADecimal+18)).toFixed(0);
+  const unitBAmt = amountB_W_Slippage.div(lpAmount).times(new BigNumber(10).pow(18-BDecimal+18)).toFixed(0);
+  const unitAAmt = amountA_W_Slippage.div(lpAmount).times(new BigNumber(10).pow(18-ADecimal+18)).toFixed(0);
 
   let spells = this.nub.Spell();
 

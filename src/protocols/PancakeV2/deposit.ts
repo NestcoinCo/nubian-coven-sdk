@@ -54,12 +54,12 @@ async function deposit(this: PancakeV2, params: DepositParams) {
   }else{
     TokenB = new Bnb(web3);
   } 
-  amountA = new BigNumber(amountA).times(10 ** await TokenA.decimals());
-  amountB = new BigNumber(amountB).times(10 ** await TokenB.decimals());
-  const [BDecimal, ADecimal] = [await TokenB.decimals(), await TokenA.decimals()]
-  const unitAmt = new BigNumber(amountB).div(amountA).times(10**(18-BDecimal+ADecimal)).toFixed(0);
-  const _slippage = (new BigNumber(10**18)).times(slippage);
-  console.log("amounts", amountA.toString(), amountB.toString());
+
+  const [BDecimal, ADecimal] = [await TokenB.decimals(), await TokenA.decimals()];
+  amountA = new BigNumber(amountA).times(new BigNumber(10).pow(ADecimal));
+  amountB = new BigNumber(amountB).times(new BigNumber(10).pow(BDecimal));
+  const unitAmt = new BigNumber(amountB).div(amountA).times(new BigNumber(10).pow(18-BDecimal+ADecimal)).toFixed(0);
+  const _slippage = (new BigNumber(10).pow(18)).times(slippage);
 
   let spells = this.nub.Spell();
   

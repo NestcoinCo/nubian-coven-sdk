@@ -47,11 +47,11 @@ async function swap(this: PancakeV2, params: SwapParams){
     slippage = slippage/100;
   }
 
-  const _amountA = new BigNumber(amountA).times(10 ** await TokenA.decimals());
-  const _amountB = new BigNumber(amountB).times(10 ** await TokenB.decimals());
-  const [buyDecimal, sellDecimal] = [+(await TokenB.decimals()), +(await TokenA.decimals())]
+  const _amountA = new BigNumber(amountA).times(new BigNumber(10).pow(await TokenA.decimals()));
+  const _amountB = new BigNumber(amountB).times(new BigNumber(10).pow(await TokenB.decimals()));
+  const [buyDecimal, sellDecimal] = [+(await TokenB.decimals()), +(await TokenA.decimals())];
   const amountB_W_Slippage = (new BigNumber(_amountB)).minus(new BigNumber(_amountB).times(slippage));
-  const unitAmt = amountB_W_Slippage.div(_amountA).times(10**(18-buyDecimal+sellDecimal)).toFixed(0);
+  const unitAmt = amountB_W_Slippage.div(_amountA).times(new BigNumber(10).pow(18-buyDecimal+sellDecimal)).toFixed(0);
 
   const route = (await this.getRoute(tokenA, tokenB))[1];
   
