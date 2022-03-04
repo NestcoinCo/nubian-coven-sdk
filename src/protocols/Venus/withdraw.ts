@@ -40,13 +40,12 @@ async function withdraw(this: Venus, params: WithdrawParams) {
     vTokenAmount = await _VToken.getVTokens(tokenAmount!, String(await Token.decimals()));
     vTokenAmount = new BigNumber(vTokenAmount).times(new BigNumber(10).pow(8)).toFixed(0);
   }else {
-    vTokenAmount = new BigNumber(vTokenAmount).times(new BigNumber(10).pow(8)).toString();
+    vTokenAmount = new BigNumber(vTokenAmount).times(new BigNumber(10).pow(8)).toFixed(0);
   }
 
-  tokenAmount = new BigNumber(tokenAmount).times(new BigNumber(10).pow(await Token.decimals())).toString()
+  tokenAmount = new BigNumber(tokenAmount).times(new BigNumber(10).pow(await Token.decimals())).toFixed(0)
 
   let spells = this.nub.Spell();
-
   // deposits tokens in Wizard
   spells.add({
     connector: "BASIC-A",

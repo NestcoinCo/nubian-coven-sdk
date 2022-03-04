@@ -49,7 +49,7 @@ export default class Wbnb {
     private async wrapTxObj(params: WbnbParams): Promise<TransactionConfig> {
 
       if (!params.amount) {
-        throw new Error("'amount' is not a number");
+        throw new Error("'amount' is not defined");
       }
 
       if (!params.from) {

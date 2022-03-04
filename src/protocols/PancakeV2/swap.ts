@@ -96,7 +96,7 @@ async function swap(this: PancakeV2, params: SwapParams){
     ]
   })
   if (value === undefined ) {
-    value = tokenA === getTokenAddress("BNB", this.nub) ? _amountA.toString() : 0;
+    value = tokenA === getTokenAddress("BNB", this.nub) ? _amountA.toFixed(0) : 0;
   }
   
   const tx = await spells.cast({ from, value, gas, gasPrice, nonce })
