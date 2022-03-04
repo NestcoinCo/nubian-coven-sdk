@@ -1,6 +1,15 @@
+import BigNumber from "bignumber.js";
 import Web3 from "web3";
 import { maxUint256 } from "../../constants";
 import { Abi } from "../../constants/abi";
+
+interface txOptions{
+  from: string,
+  gasPrice?: string,
+  gas?: number,
+  value?: number|string,
+  nonce?: number,
+}
 
 class Erc20{
   address: string;
@@ -30,6 +39,12 @@ class Erc20{
 
   async allowance(owner: string, spender:string){
     return this.contract.methods.allowance(owner, spender).call();
+  }
+
+  // write functions
+  async send(receiver: string, amount: string, options?: txOptions){
+    return this.contract.methods.transfer(receiver, amount)
+      .send(options)
   }
 }
 
