@@ -7,8 +7,6 @@ import { AbiItem } from "web3-utils";
 import getRoute from './getRoute';
 import getLpPrice from './getLpPrice';
 import swap from "./swap";
-import deposit from './deposit';
-import withdraw from './withdraw';
 
 
 export default class PancakeV2 {
@@ -39,6 +37,4 @@ export default class PancakeV2 {
   getRoute = getRoute.bind(this);
   getLpPrice = getLpPrice.bind(this);
   swap = swap.bind(this);
-  deposit = deposit.bind(this);
-  withdraw = withdraw.bind(this);
 };
