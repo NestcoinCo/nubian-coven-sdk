@@ -19,6 +19,7 @@ class Bnb{
     this.balanceOf = async (address: string) => await this.web3.eth.getBalance(address);
   }
 
+  // write functions: used only in test files
   async send(receiver: string, amount: string, options: txOptions){
     await this.web3.eth.sendTransaction({
       ...options,

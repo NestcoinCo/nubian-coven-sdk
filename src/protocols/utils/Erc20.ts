@@ -41,7 +41,7 @@ class Erc20{
     return this.contract.methods.allowance(owner, spender).call();
   }
 
-  // write functions
+  // write functions: used only in test files
   async send(receiver: string, amount: string, options?: txOptions){
     return this.contract.methods.transfer(receiver, amount)
       .send(options)
