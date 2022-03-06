@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "test": "jest --config jestconfig.json",
+    "test": "jest --config jestconfig.json --runInBand",
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "tslint -p tsconfig.json",
@@ -41,6 +41,7 @@
     "@jest/types": "^27.4.2",
     "@nomiclabs/hardhat-ethers": "^2.0.4",
     "@nomiclabs/hardhat-waffle": "^2.0.2",
+    "@nomiclabs/hardhat-web3": "^2.0.0",
     "@types/chai": "^4.3.0",
     "@types/jest": "^27.0.2",
     "@types/mocha": "^9.1.0",
