@@ -4,4 +4,5 @@ import { core as testnetcore } from './testnet/core';
 export const core = {
   97: testnetcore,
   56: mainnetCore,
+  31337: mainnetCore
 };

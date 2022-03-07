@@ -16,7 +16,12 @@ export const protocols= {
         versions:{
           2: pancakeswapV2_Testnet
         }
-      }
+      },
+      31337: {
+        versions: {
+          2: pancakeswapV2_Mainnet,
+        },
+      },
     }
   },
   autofarm:{
@@ -30,7 +35,12 @@ export const protocols= {
         versions:{
           2: autofarmV2_Testnet
         }
-      }
+      },
+      31337: {
+        versions: {
+          2: autofarmV2_Mainnet,
+        },
+      },
     }
   },
   venus:{

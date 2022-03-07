@@ -25,7 +25,7 @@ export default class Wbnb {
       const txObj = await this.wrapTxObj(params);
       const gas = await this.getGas(txObj);
 
-      const gasPrice = this.nub.web3.eth.getGasPrice()
+      const gasPrice = await this.nub.web3.eth.getGasPrice()
 
       return {
         gas,
@@ -49,7 +49,7 @@ export default class Wbnb {
     private async wrapTxObj(params: WbnbParams): Promise<TransactionConfig> {
 
       if (!params.amount) {
-        throw new Error("'amount' is not a number");
+        throw new Error("'amount' is not defined");
       }
 
       if (!params.from) {
@@ -105,7 +105,7 @@ export default class Wbnb {
     async estimateUnwrapGas(params: WbnbParams){
       const txObj = await this.unwrapTxObj(params);
       const gas = await this.getGas(txObj);
-      const gasPrice = this.nub.web3.eth.getGasPrice()
+      const gasPrice = await this.nub.web3.eth.getGasPrice()
 
       return {
         gas,

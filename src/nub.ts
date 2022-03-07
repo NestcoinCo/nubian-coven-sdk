@@ -14,7 +14,7 @@ import { Spells } from './spells';
 import { Transaction } from './transaction';
 import { wrapIfSpells, ETH } from './utils';
 import { Erc20 } from './utils/Erc20';
-import { AutoFarm, Venus, PancakeV2, Wbnb } from './protocols';
+import { Venus, PancakeV2, Wbnb } from './protocols';
 import {maxUint256} from "./constants/index";
 
 type NUBConfig =
@@ -33,7 +33,7 @@ type NUBConfig =
     mode?: 'browser';
   };
 
-type ChainId = 56 | 97;
+type ChainId = 56 | 97 | 31337;
 
 type CastParams = {
   spells: Spells;
@@ -50,8 +50,8 @@ export class NUB {
   readonly transaction = new Transaction(this);
 
   // Protocols
-  public autoFarm;
   public pancakeswap;
+  public venus;
 
   public wbnb;
   public erc20;
@@ -81,12 +81,12 @@ export class NUB {
     this.CHAIN_ID = chainId;
     this.config = getNUBConfig(config);
     this.config.web3.eth.getChainId().then((_chainId) => {
-      if (this.CHAIN_ID !== _chainId) {
+      if (process.env.NODE_ENV !== "test" && this.CHAIN_ID !== _chainId) {
         throw new Error(
           `chainId doesn't match with the web3. Initiate 'nub' like this: 'const nub = new NUB(web3, chainId)'`,
         );
       }
-      if (![56, 97].includes(chainId)) {
+      if ((process.env.NODE_ENV !== "test" && _chainId === 31337) || ![56, 97].includes(chainId) ) {
         throw new Error(`chainId '${_chainId}' is not supported.`);
       } else {
         this.CHAIN_ID = _chainId as ChainId;
@@ -95,8 +95,8 @@ export class NUB {
 
     this.erc20 = new Erc20(this);
     this.pancakeswap = new PancakeV2(this);
+    this.venus = new Venus(this);
     this.eth = new ETH(this);
-    this.autoFarm = new AutoFarm(this);
     this.wbnb = new Wbnb(this);
   }
 
@@ -160,16 +160,16 @@ export class NUB {
       from: await this.internal.getAddress(),
       origin: this.origin,
     };
-    console.log('Spells: ', params);
+    //console.log('Spells: ', params);
     const mergedParams = Object.assign(defaults, wrapIfSpells(params)) as CastParams;
 
-    console.log('Merged Params: ', mergedParams);
+    //console.log('Merged Params: ', mergedParams);
     if (!mergedParams.from) throw new Error(`Parameter 'from' is not defined.`);
     if (!mergedParams.to) throw new Error(`Parameter 'to' is not defined.`);
 
     const data = await this.getData(mergedParams);
 
-    console.log('Data: ', data);
+    //console.log('Data: ', data);
 
     const transactionConfig = await this.internal.getTransactionConfig({
       from: mergedParams.from,
@@ -181,11 +181,11 @@ export class NUB {
       data, // Data should be generated using the abi of the implementations contract
     });
 
-    console.log('transactionConfig: ', transactionConfig);
+    //console.log('transactionConfig: ', transactionConfig);
 
     const transaction = await this.transaction.send(transactionConfig);
 
-    console.log('transaction: ', transaction);
+    //console.log('transaction: ', transaction);
 
     return transaction;
   }

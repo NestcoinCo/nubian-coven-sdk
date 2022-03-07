@@ -14,6 +14,10 @@ const getTokenAddresses = (symbols: (keyof typeof Addresses.tokens.chains[56])[]
   return symbols.map((symbol) => getTokenAddress(symbol, nub));
 }
 
+// const getProtocolAddress = (path: NestedKeyOf<typeof Addresses>) => {
+//   return Addresses[path]
+// }
+
 export {
   Addresses,
   maxUint256,

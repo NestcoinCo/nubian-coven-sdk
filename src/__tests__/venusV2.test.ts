@@ -1,123 +1,164 @@
 const Web3 = require("web3");
-import axios from "axios";
-import { log } from "console";
+import BigNumber from "bignumber.js";
+import { Console } from "console";
 import NUB from "..";
-require('dotenv').config()
+import { Addresses, getTokenAddress } from "../constants";
+import Bnb from "../protocols/utils/Bnb";
+import Erc20 from "../protocols/utils/Erc20";
+import { tokenMapping, vTokenMapping } from "../protocols/utils/venusMapping";
+import VToken from "../protocols/utils/VToken";
+require('dotenv').config();
+const hre = require("hardhat");
 
-let web3;
+let web3: typeof Web3;
 let nub: NUB;
-let gasPrice: string = '5000000000';
-// Tokens
-const BNB = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-const vBNB = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
-const TUSD = "0x14016e85a25aeb13065688cafb43044c2ef86784";
-const vTUSD = "0x08ceb3f4a7ed3500ca0982bcd0fc7816688084c3";
-const CAKE = "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82";
-const vCAKE = "0x86ac3974e2bd0d60825230fa6f355ff11409df5c";
-const vBUSD = "0x95c78222B3D6e262426483D42CfA53685A67Ab9D";
-const BUSD = "0xe9e7cea3dedca5984780bafc599bd69add087d56";
+let user: string;
+const vBag = 	"0xf977814e90da44bfa03b6295a0616a897441acec";
 
-const maxAmt = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-let address: string;
-
-beforeAll(() => {
-  web3 = new Web3(new Web3.providers.HttpProvider("https://bsc-dataseed.binance.org/"));
-  nub = new NUB({
-    web3: web3,
-    mode: 'node',
-    privateKey: process.env.PRIVATE_KEY || "",
+beforeAll(async () => {
+  hre.web3.eth.setProvider(new hre.Web3.providers.HttpProvider("http://localhost:8545"));
+  await hre.network.provider.request({
+    method: "hardhat_impersonateAccount",
+    params: [vBag],
   });
-  address = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY).address;
+
+  //web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545/"));
+  web3 = hre.web3;
+  nub = new NUB({
+    web3: hre.web3,
+    mode: 'node',
+    privateKey: process.env.PRIVATE_KEY!,
+  });
+  user = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY).address;
 })
 
-xdescribe("Venus Test", () => {
+export const ensureAllowance = async (Tokens: ( Bnb|Erc20|VToken )[], owner: string, spender: string, amounts: (string|number)[]) => {
+  for ( let i = 0; i < Tokens.length; i++){
+    const token = Tokens[i];
+    if(token instanceof Bnb) return;
+    if ( await token.allowance(owner, spender) > amounts[i]) return;
+    await token.approve(spender);
+  }
+}
+
+describe("Venus", () => {
+
+  test("Deposit", async () => {
+    const amount = 1;
+    const token = getTokenAddress("USDT", nub);
+    const Token = new Erc20(token, nub.web3);
+
+    // send amount to user
+    const actualAmount = new BigNumber(amount).times(new BigNumber(10).pow(await Token.decimals())).toString();
+    await Token.send(user, actualAmount, {from: vBag});
+
+    const tokenBalanceBefore = await Token.balanceOf(user);
+
+    const key = Object.entries(tokenMapping).filter(([key, value]) => value === token)[0][0] as keyof typeof tokenMapping;
+    const vToken = vTokenMapping[key];
+    const _VToken = new VToken(vToken, nub.web3);
+    const vTokenBalanceBefore = await _VToken.balanceOf(user);
+    ensureAllowance(
+      [Token], 
+      user, 
+      Addresses.core[nub.CHAIN_ID].versions[2].implementations, 
+      [new BigNumber(10).pow(await Token.decimals()).times(amount).toFixed(0)]
+    );
+
+    const tx = await nub.venus.deposit({
+      amount,
+      address: token,
+      gasPrice: await nub.web3.eth.getGasPrice()
+    }) as unknown as {status: boolean}
+
+    const tokenBalanceAfter = await Token.balanceOf(user);
+    const vTokenBalanceAfter = await _VToken.balanceOf(user);
+    expect(+new BigNumber(vTokenBalanceAfter).minus(vTokenBalanceBefore).toFixed(0))
+      .toBeGreaterThan(0);
+    expect(+new BigNumber(tokenBalanceBefore).minus(tokenBalanceAfter).toFixed(0))
+      .toEqual(+new BigNumber(10).pow(await Token.decimals()).times(amount).toFixed(0));
+
+    expect(tx?.status).toBeTruthy;
+  });
+
+  test("Withdraw with vToken Amount", async () => {
+    const vTokenAddress = vTokenMapping["USDT-A"];
+    const vTokenAmount = 40;
+
+    const key = Object.entries(vTokenMapping).filter(([key, value]) => value === vTokenAddress)[0][0] as keyof typeof tokenMapping;
+    const _VToken = new VToken(vTokenAddress, nub.web3);
+    const Token = new Erc20(tokenMapping[key], nub.web3);
+
+    // send amount to user
+    const actualAmount = new BigNumber(vTokenAmount).times(new BigNumber(10).pow(await _VToken.decimals())).toString();
+    await _VToken.send(user, actualAmount, {from: vBag});
+
+    const tokenBalanceBefore = await Token.balanceOf(user);
+    const vTokenBefore = await _VToken.balanceOf(user);
+
+    ensureAllowance(
+      [_VToken], 
+      user, 
+      Addresses.core[nub.CHAIN_ID].versions[2].implementations, 
+      [ new BigNumber(10).pow(await _VToken.decimals()).times(vTokenAmount).toFixed(0)]
+    );
+
+    const tx = await nub.venus.withdraw({
+      vTokenAddress,
+      vTokenAmount,
+       gasPrice: await nub.web3.eth.getGasPrice()
+    }) as unknown as { status: boolean};
+
+    const tokenBalanceAfter = await Token.balanceOf(user);
+    const vTokenAfter = await _VToken.balanceOf(user);
+
+    expect(+new BigNumber(vTokenBefore).minus(vTokenAfter).toFixed(0))
+      .toEqual(+new BigNumber(10).pow(8).times(vTokenAmount).toFixed(0));
+    expect(+new BigNumber(tokenBalanceAfter).minus(tokenBalanceBefore).toFixed(0))
+      .toBeGreaterThan(0);
+
+    expect(tx?.status).toBeTruthy;
+  })
+
   
-  xtest("Deposit in Venus", async () => {
-    //await nub.erc20.approve({token: CAKE, gasPrice})
-    let spells = nub.Spell();
+  test("Withdraw with Token Amount", async () => {
+    const vTokenAddress = vTokenMapping["USDT-A"];
+    const tokenAmount = 1000;
 
-    //deposit CAKE
-    spells.add({
-      connector: "BASIC-A",
-      method: "deposit",
-      args: [
-        CAKE,
-        "100000000000000000",
-        0,
-        0
-      ]
-    });
+    const key = Object.entries(vTokenMapping).filter(([key, value]) => value === vTokenAddress)[0][0] as keyof typeof tokenMapping;
+    const _VToken = new VToken(vTokenAddress, nub.web3);
+    const Token = new Erc20(tokenMapping[key], nub.web3);
 
-    spells.add({
-      connector: "VenusV2",
-      method: "deposit",
-      args: [
-        "CAKE-A",
-        maxAmt,
-        0,
-        0
-      ]
-    });
+    // send amount to user
+    const vTokenAmount = await _VToken.getVTokens(tokenAmount, (await Token.decimals()).toString());
+    const actualAmount = new BigNumber(vTokenAmount).times(new BigNumber(10).pow(await _VToken.decimals())).toFixed(0);
+    await _VToken.send(user, actualAmount, {from: vBag});
 
-    //withdraw vCAKE from Wizard
-    spells.add({
-      connector: "BASIC-A",
-      method: "withdraw",
-      args: [
-        vCAKE,
-        maxAmt,
-        address, 
-        0,
-        0
-      ]
-    })
-  
-    const txHash = await spells.cast({gasPrice})
-    expect(txHash).toBeDefined();
+    const tokenBalanceBefore = await Token.balanceOf(user);
+    const vTokenBefore = await _VToken.balanceOf(user);
+
+    ensureAllowance(
+      [Token], 
+      user, 
+      Addresses.core[nub.CHAIN_ID].versions[2].implementations, 
+      [ new BigNumber(10).pow(await Token.decimals()).times(tokenAmount).toFixed(0) ]
+    );
+
+    const tx = await nub.venus.withdraw({
+      vTokenAddress,
+      tokenAmount,
+       gasPrice: await nub.web3.eth.getGasPrice()
+    }) as unknown as { status: boolean};
+
+    const tokenBalanceAfter = await Token.balanceOf(user);
+    const vTokenAfter = await _VToken.balanceOf(user);
+
+    expect(+new BigNumber(vTokenBefore).minus(vTokenAfter).toFixed(0))
+      .toBeGreaterThan(0);
+    expect(+new BigNumber(tokenBalanceAfter).minus(tokenBalanceBefore).toFixed(0))
+      .toEqual(+new BigNumber(10).pow(await Token.decimals()).times(tokenAmount).toFixed(0));
+
+    expect(tx?.status).toBeTruthy;
   })
   
-  xtest("Withdraw from Venus", async () => {
-    //await nub.erc20.approve({token: vBUSD, gasPrice});
-    let spells = nub.Spell();
-    
-    //deposit vTUSD in Wizard
-    spells.add({
-      connector: "BASIC-A",
-      method: "deposit",
-      args: [
-        vBUSD,
-        maxAmt,
-        0,
-        0
-      ]
-    })
-
-    // withdraw TUSD from Venus
-    spells.add({
-      connector: "VenusV2",
-      method: "withdraw",
-      args: [
-        "BUSD-A",
-        maxAmt,
-        0,
-        0
-      ]
-    })
-
-    // withdraw TUSD from Wizard
-    spells.add({
-      connector: "BASIC-A",
-      method: "withdraw",
-      args: [
-        BUSD,
-        maxAmt,
-        address, // address to receive vBNB
-        0,
-        0
-      ]
-    })
-  
-    const txHash = await spells.cast({gasPrice})
-    expect(txHash).toBeDefined();
-  })
 });
