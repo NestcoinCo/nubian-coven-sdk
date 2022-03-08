@@ -5,10 +5,11 @@
       "declaration": true,
       "outDir": "./lib",
       "strict": true,
-      "forceConsistentCasingInFileNames": false
+      "forceConsistentCasingInFileNames": false,
+      "skipLibCheck": true
     },
     "include": ["src", "scripts", "src/__tests__/*"],
     "exclude": ["node_modules", ],
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
   }
