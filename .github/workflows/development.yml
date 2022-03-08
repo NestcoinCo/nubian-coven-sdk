@@ -15,8 +15,5 @@ jobs:
       - name: Run lint
         run: npm run lint
       
-      - name: Start Forked node
-        run: npm run test:node
-      
       - name: Run test
         run: npm run test
