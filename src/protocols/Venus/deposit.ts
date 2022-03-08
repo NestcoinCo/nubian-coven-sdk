@@ -12,10 +12,8 @@ type DepositParams = {
 } & Pick<TransactionConfig, 'from' | 'value' | 'gas' | 'gasPrice' | 'nonce'>;
 
 async function deposit(this: Venus, params: DepositParams) {
-  let {
-    receiver, address, amount,
-    from, value, gas, gasPrice, nonce 
-  } = params;
+  let { receiver, from } = params;
+  const { address, amount, value, gas, gasPrice, nonce } = params
   if(receiver === undefined){
     receiver = await this.nub.internal.getAddress();
   }
@@ -23,10 +21,12 @@ async function deposit(this: Venus, params: DepositParams) {
     from = await this.nub.internal.getAddress();
   }
 
-  let spells = this.nub.Spell();
-  const key = Object.entries(tokenMapping).filter(([key, value]) => value === address)[0][0] as keyof typeof tokenMapping;
+
+  const key = Object.entries(tokenMapping).filter(([_, _value]) => _value === address)[0][0] as keyof typeof tokenMapping;
   const Token = new Erc20(address, this.nub.web3)
   const _amount = new BigNumber(amount).times(new BigNumber(10).pow(await Token.decimals()))
+
+  const spells = this.nub.Spell();
 
   // deposit token in Wizard
   spells.add({
@@ -52,7 +52,7 @@ async function deposit(this: Venus, params: DepositParams) {
     ]
   });
 
-  //withdraw vToken from Wizard
+  // withdraw vToken from Wizard
   spells.add({
     connector: "BASIC-A",
     method: "withdraw",

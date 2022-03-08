@@ -1,11 +1,11 @@
-const Web3 = require("web3");
-import {  } from 'web3-core';
 import NUB from "..";
 import { getTokenAddress, Addresses } from '../constants';
 import Erc20 from "../protocols/utils/Erc20";
 import Bnb from "../protocols/utils/Bnb";
 import BigNumber from 'bignumber.js';
-require('dotenv').config();
+import {config} from "dotenv";
+config();
+// tslint:disable-next-line:no-var-requires
 const hre = require("hardhat");
 import VToken from '../protocols/utils/VToken';
 
@@ -31,7 +31,7 @@ beforeAll(async () => {
     params: [binanceHotWallet6],
   });
 
-  //web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545/"));
+  // web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545/"));
   web3 = hre.web3;
   nub = new NUB({
     web3: hre.web3,
@@ -47,7 +47,7 @@ describe("Pancakeswap",  () => {
 
   // swap token for token
   test("Swap token for token", async () => {
-    //await new Promise(resolve => setTimeout(resolve, 30));
+    // await new Promise(resolve => setTimeout(resolve, 30));
     const slippage = 2;
     const tokenA = getTokenAddress("USDC", nub);
 
@@ -59,8 +59,8 @@ describe("Pancakeswap",  () => {
     const actualAmountA = new BigNumber(amountA).times(new BigNumber(10).pow(await TokenA.decimals())).toString();
     await TokenA.send(user, actualAmountA, {from: binanceHotWallet6})
 
-    let amountB = new BigNumber((await nub.pancakeswap.getRoute(tokenA, tokenB))[0]).times(amountA);
-    let slippageAmt = (new BigNumber(amountB)).minus(new BigNumber(amountB).times(slippage));
+    const amountB = new BigNumber((await nub.pancakeswap.getRoute(tokenA, tokenB))[0]).times(amountA);
+    const slippageAmt = (new BigNumber(amountB)).minus(new BigNumber(amountB).times(slippage));
     const _amountB = (new BigNumber(amountB)).div(new BigNumber(10).pow(await TokenB.decimals())).toFixed(0);
 
     const balanceABefore = await TokenA.balanceOf(user);
@@ -89,12 +89,13 @@ describe("Pancakeswap",  () => {
       .toEqual(+new BigNumber(10).pow(18).times(amountA).toFixed(0));
     expect(+new BigNumber(balanceBAfter).minus(balanceBBefore).toFixed(0))
       .toBeGreaterThanOrEqual(+slippageAmt.toFixed(0));
+    // tslint:disable-next-line:no-unused-expression
     expect(tx?.status).toBeTruthy;
   });
 
-  //swap token for BNB
+  // swap token for BNB
   test("Swap token for BNB", async () => {
-    //await new Promise(resolve => setTimeout(resolve, 30));
+    // await new Promise(resolve => setTimeout(resolve, 30));
     const slippage = 2;
     const tokenA = getTokenAddress("USDT", nub);
 
@@ -107,8 +108,8 @@ describe("Pancakeswap",  () => {
     const actualAmountA = new BigNumber(amountA).times(new BigNumber(10).pow(await TokenA.decimals())).toString();
     await TokenA.send(user, actualAmountA, {from: binanceHotWallet6});
 
-    let amountB = new BigNumber((await nub.pancakeswap.getRoute(tokenA, tokenB))[0]).times(amountA);
-    let slippageAmt = (new BigNumber(amountB)).minus(new BigNumber(amountB).times(slippage));
+    const amountB = new BigNumber((await nub.pancakeswap.getRoute(tokenA, tokenB))[0]).times(amountA);
+    const slippageAmt = (new BigNumber(amountB)).minus(new BigNumber(amountB).times(slippage));
     const _amountB = amountB.div(new BigNumber(10).pow(await TokenB.decimals())).toFixed(0);
 
     const balanceABefore = await TokenA.balanceOf(user);
@@ -140,6 +141,7 @@ describe("Pancakeswap",  () => {
     expect(differenceB)
       .toBeGreaterThanOrEqual(+slippageAmt.toFixed(0));
 
+    // tslint:disable-next-line:no-unused-expression
     expect(tx?.status).toBeTruthy;
   });
 
@@ -157,10 +159,10 @@ describe("Pancakeswap",  () => {
     const actualAmountA = new BigNumber(amountA).times(new BigNumber(10).pow(await TokenA.decimals())).toString();
     await TokenA.send(user, actualAmountA, {from: binanceHotWallet6});
 
-    let amountB = new BigNumber((await nub.pancakeswap.getRoute(tokenA, tokenB))[0]).times(amountA);
+    const amountB = new BigNumber((await nub.pancakeswap.getRoute(tokenA, tokenB))[0]).times(amountA);
 
-    let slippageAmt = (new BigNumber(amountB)).minus(new BigNumber(amountB).times(slippage));
-    let _amountB = Number((new BigNumber(amountB)).div(10 ** await TokenB.decimals()).toString())
+    const slippageAmt = (new BigNumber(amountB)).minus(new BigNumber(amountB).times(slippage));
+    const _amountB = Number((new BigNumber(amountB)).div(10 ** await TokenB.decimals()).toString())
 
     const balanceABefore = await TokenA.balanceOf(user);
     const balanceBBefore = await TokenB.balanceOf(user);
@@ -188,6 +190,7 @@ describe("Pancakeswap",  () => {
       .toBeGreaterThan(+new BigNumber(10).pow(18).times(amountA).toFixed(0));
     expect(+new BigNumber(balanceBAfter).minus(balanceBBefore).toFixed(0))
       .toBeGreaterThanOrEqual(+slippageAmt.toFixed(0));
+    // tslint:disable-next-line:no-unused-expression
     expect(tx?.status).toBeTruthy;
   });
 });

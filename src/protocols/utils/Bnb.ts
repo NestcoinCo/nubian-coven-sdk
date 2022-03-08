@@ -1,6 +1,6 @@
 import Web3 from "web3";
 
-interface txOptions{
+interface TxOptions{
   from: string,
   gasPrice?: string,
   gas?: number,
@@ -20,7 +20,7 @@ class Bnb{
   }
 
   // write functions: used only in test files
-  async send(receiver: string, amount: string, options: txOptions){
+  async send(receiver: string, amount: string, options: TxOptions){
     await this.web3.eth.sendTransaction({
       ...options,
       to: receiver,

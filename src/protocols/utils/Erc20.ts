@@ -3,7 +3,7 @@ import Web3 from "web3";
 import { maxUint256 } from "../../constants";
 import { Abi } from "../../constants/abi";
 
-interface txOptions{
+interface TxOptions{
   from: string,
   gasPrice?: string,
   gas?: number,
@@ -42,7 +42,7 @@ class Erc20{
   }
 
   // write functions: used only in test files
-  async send(receiver: string, amount: string, options?: txOptions){
+  async send(receiver: string, amount: string, options?: TxOptions){
     return this.contract.methods.transfer(receiver, amount)
       .send(options)
   }
