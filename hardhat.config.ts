@@ -2,9 +2,8 @@ import "@nomiclabs/hardhat-web3";
 import "@nomiclabs/hardhat-waffle";
 require('dotenv').config();
 
-const { utils } = require('ethers');
-
-const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const PRIVATE_KEY = "689af8efa8c651a91ad287602527f3af2fe9f6501a7ac4b061667b5a93e037fd";
+const MORALIS_KEY = "https://speedy-nodes-nyc.moralis.io/40fcc85be509fe0b0f81c26e/bsc/mainnet/archive";
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -46,7 +45,7 @@ module.exports = {
     },
     hardhat: {
       forking: {
-        url: process.env.MORALIS_KEY,
+        url: MORALIS_KEY,
         blockNumber: 15730775,
       },
       blockGasLimit: 12000000,

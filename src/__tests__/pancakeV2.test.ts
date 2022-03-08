@@ -36,7 +36,7 @@ beforeAll(async () => {
   nub = new NUB({
     web3: hre.web3,
     mode: 'node',
-    privateKey: process.env.PRIVATE_KEY!,
+    privateKey: "689af8efa8c651a91ad287602527f3af2fe9f6501a7ac4b061667b5a93e037fd",
   });
 
   BNB = getTokenAddress("BNB", nub);
