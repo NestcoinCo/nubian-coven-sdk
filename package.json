@@ -5,6 +5,7 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
+    "test:node": "npx hardhat node --fork https://speedy-nodes-nyc.moralis.io/40fcc85be509fe0b0f81c26e/bsc/mainnet/archive",
     "test": "jest --config jestconfig.json --runInBand",
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
