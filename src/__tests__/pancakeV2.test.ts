@@ -5,9 +5,11 @@ import Bnb from "../protocols/utils/Bnb";
 import BigNumber from 'bignumber.js';
 import {config} from "dotenv";
 config();
+import { privateKey } from "./utils/constants";
+import ensureAllowance from "./utils/ensureAllowance";
 // tslint:disable-next-line:no-var-requires
 const hre = require("hardhat");
-import VToken from '../protocols/utils/VToken';
+
 
 let web3: any;
 let nub: NUB;
@@ -15,14 +17,6 @@ let user: string;
 let BNB: string;
 const binanceHotWallet6 = "0x8894E0a0c962CB723c1976a4421c95949bE2D4E3";
 
-const ensureAllowance = async (Tokens: (Bnb|Erc20|VToken)[], owner: string, spender: string, amounts: (string|number)[]) => {
-  for ( let i = 0; i < Tokens.length; i++){
-    const token = Tokens[i];
-    if(token instanceof Bnb) return;
-    if ( await token.allowance(owner, spender) > amounts[i]) return;
-    await token.approve(spender);
-  }
-}
 
 beforeAll(async () => {
   hre.web3.eth.setProvider(new hre.Web3.providers.HttpProvider("http://localhost:8545"));
@@ -32,15 +26,16 @@ beforeAll(async () => {
   });
 
   // web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545/"));
+
   web3 = hre.web3;
   nub = new NUB({
     web3: hre.web3,
     mode: 'node',
-    privateKey: "689af8efa8c651a91ad287602527f3af2fe9f6501a7ac4b061667b5a93e037fd",
+    privateKey,
   });
 
   BNB = getTokenAddress("BNB", nub);
-  user = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY).address;
+  user = web3.eth.accounts.privateKeyToAccount(privateKey).address;
 })
 
 describe("Pancakeswap",  () => {

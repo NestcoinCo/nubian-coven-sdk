@@ -8,6 +8,8 @@ import { tokenMapping, vTokenMapping } from "../protocols/utils/venusMapping";
 import VToken from "../protocols/utils/VToken";
 import {config} from "dotenv";
 config();
+import ensureAllowance from "./utils/ensureAllowance";
+import { privateKey } from "./utils/constants";
 // tslint:disable-next-line:no-var-requires
 const hre = require("hardhat");
 
@@ -28,19 +30,10 @@ beforeAll(async () => {
   nub = new NUB({
     web3: hre.web3,
     mode: 'node',
-    privateKey: "689af8efa8c651a91ad287602527f3af2fe9f6501a7ac4b061667b5a93e037fd",
+    privateKey,
   });
-  user = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY!).address;
+  user = web3.eth.accounts.privateKeyToAccount(privateKey).address;
 })
-
-export const ensureAllowance = async (Tokens: ( Bnb|Erc20|VToken )[], owner: string, spender: string, amounts: (string|number)[]) => {
-  for ( let i = 0; i < Tokens.length; i++){
-    const token = Tokens[i];
-    if(token instanceof Bnb) return;
-    if ( await token.allowance(owner, spender) > amounts[i]) return;
-    await token.approve(spender);
-  }
-}
 
 describe("Venus", () => {
 
@@ -59,13 +52,13 @@ describe("Venus", () => {
     const vToken = vTokenMapping[key];
     const _VToken = new VToken(vToken, nub.web3);
     const vTokenBalanceBefore = await _VToken.balanceOf(user);
-    ensureAllowance(
+    await ensureAllowance(
       [Token], 
       user, 
       Addresses.core[nub.CHAIN_ID].versions[2].implementations, 
       [new BigNumber(10).pow(await Token.decimals()).times(amount).toFixed(0)]
     );
-
+    
     const tx = await nub.venus.deposit({
       amount,
       address: token,
@@ -98,7 +91,7 @@ describe("Venus", () => {
     const tokenBalanceBefore = await Token.balanceOf(user);
     const vTokenBefore = await _VToken.balanceOf(user);
 
-    ensureAllowance(
+    await ensureAllowance(
       [_VToken], 
       user, 
       Addresses.core[nub.CHAIN_ID].versions[2].implementations, 
@@ -140,7 +133,7 @@ describe("Venus", () => {
     const tokenBalanceBefore = await Token.balanceOf(user);
     const vTokenBefore = await _VToken.balanceOf(user);
 
-    ensureAllowance(
+    await ensureAllowance(
       [Token], 
       user, 
       Addresses.core[nub.CHAIN_ID].versions[2].implementations, 

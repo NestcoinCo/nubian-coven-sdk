@@ -33,10 +33,6 @@ class Erc20{
     return balance;
   }
 
-  async approve(address: string){
-    return this.contract.methods.approve(address, maxUint256).call();
-  }
-
   async allowance(owner: string, spender:string){
     return this.contract.methods.allowance(owner, spender).call();
   }
@@ -45,6 +41,10 @@ class Erc20{
   async send(receiver: string, amount: string, options?: TxOptions){
     return this.contract.methods.transfer(receiver, amount)
       .send(options)
+  }
+
+  async approve(address: string, options?: TxOptions){
+    return this.contract.methods.approve(address, maxUint256).send(options);
   }
 }
 
