@@ -3,7 +3,6 @@ import "@nomiclabs/hardhat-waffle";
 require('dotenv').config();
 
 const PRIVATE_KEY = "689af8efa8c651a91ad287602527f3af2fe9f6501a7ac4b061667b5a93e037fd";
-const MORALIS_KEY = "https://speedy-nodes-nyc.moralis.io/40fcc85be509fe0b0f81c26e/bsc/mainnet/archive";
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -42,13 +41,6 @@ module.exports = {
       url: 'https://bsc-dataseed.binance.org/',
       chainId: 56,
       accounts: [`0x${PRIVATE_KEY}`],
-    },
-    hardhat: {
-      forking: {
-        url: MORALIS_KEY,
-        blockNumber: 15730775,
-      },
-      blockGasLimit: 12000000,
-    },
+    }
   },
 };
