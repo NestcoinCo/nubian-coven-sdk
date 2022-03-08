@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "test:node": "npx hardhat node --fork https://speedy-nodes-nyc.moralis.io/40fcc85be509fe0b0f81c26e/bsc/mainnet/archive & ",
+    "test:node": "npx hardhat node --fork  $npm_config_moralis_url &",
     "test:jest": "sleep 20 && jest --config jestconfig.json --runInBand",
     "test": "npm run test:node && npm run test:jest",
     "build": "tsc",
