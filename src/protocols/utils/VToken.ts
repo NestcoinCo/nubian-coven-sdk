@@ -23,7 +23,7 @@ class VToken extends Erc20{
   }
 
   async getOneVTokenInUnderlying(underlyingDecimals:string): Promise<number>{
-    const mantissa = 18 + parseInt(underlyingDecimals) - 8;
+    const mantissa = 18 + parseInt(underlyingDecimals, 10) - 8;
     const exchangeRate = await this.exchangeRate();
     return new BigNumber(exchangeRate).div(Math.pow(10, mantissa)).toNumber();
   }

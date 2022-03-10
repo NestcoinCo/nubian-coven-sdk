@@ -15,9 +15,9 @@ type WithdrawParams = {
 
 async function withdraw(this: Venus, params: WithdrawParams) {
   let {
-    receiver, vTokenAddress, tokenAmount, vTokenAmount,
-    from, value, gas, gasPrice, nonce 
+    receiver, tokenAmount, vTokenAmount,from 
   } = params;
+  const {vTokenAddress, value, gas, gasPrice, nonce} = params;
   if(receiver === undefined){
     receiver = await this.nub.internal.getAddress();
   }
@@ -28,7 +28,7 @@ async function withdraw(this: Venus, params: WithdrawParams) {
     from = await this.nub.internal.getAddress();
   }
 
-  const key = Object.entries(vTokenMapping).filter(([key, value]) => value === vTokenAddress)[0][0] as keyof typeof tokenMapping;
+  const key = Object.entries(vTokenMapping).filter(([_, _value]) => _value === vTokenAddress)[0][0] as keyof typeof tokenMapping;
   const _VToken = new VToken(vTokenAddress, this.nub.web3);
   const Token = new Erc20(tokenMapping[key], this.nub.web3);
 
@@ -45,7 +45,7 @@ async function withdraw(this: Venus, params: WithdrawParams) {
 
   tokenAmount = new BigNumber(tokenAmount).times(new BigNumber(10).pow(await Token.decimals())).toFixed(0)
 
-  let spells = this.nub.Spell();
+  const spells = this.nub.Spell();
   // deposits tokens in Wizard
   spells.add({
     connector: "BASIC-A",

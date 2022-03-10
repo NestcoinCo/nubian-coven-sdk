@@ -1,19 +1,21 @@
-const Web3 = require("web3");
 import BigNumber from "bignumber.js";
 import NUB from "..";
 import { getTokenAddress } from "../constants";
-require('dotenv').config();
+import {config} from "dotenv";
+config();
 import { Addresses } from "../constants/addresses";
-import { Wbnb } from "../protocols";
 import BNB from "../protocols/utils/Bnb";
-import Token from "../protocols/utils/Erc20"
+import Token from "../protocols/utils/Erc20";
+import { privateKey } from "./utils/constants";
+import ensureAllowance from "./utils/ensureAllowance";
+// tslint:disable-next-line:no-var-requires
 const hre = require("hardhat");
 
 
 let web3;
 let nub: NUB;
 
-let gasPrice: string = '20000000000';
+const gasPrice: string = '20000000000';
 const {tokens: {chains: {56:{PRED}}}} = Addresses;
 let bnb: BNB;
 let wbnb: Token;
@@ -30,41 +32,48 @@ beforeAll( async () => {
   // web3 = new Web3(new Web3.providers.HttpProvider("https://bsc-dataseed1.defibit.io/"));
   web3 = hre.web3;
   nub = new NUB({
-    web3: web3,
+    web3,
     mode: 'node',
-    privateKey: process.env.PRIVATE_KEY || "",
+    privateKey,
   });
   bnb = new BNB(nub.web3);
   wbnb = new Token(getTokenAddress("WBNB", nub), nub.web3);
-  user = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY).address;
+  user = web3.eth.accounts.privateKeyToAccount(privateKey).address;
 })
 
 describe('Estimate gas', () => {
   test("Estimate Gas for token transfer", async () => {
 
-    const price_obj = await nub.estimateGasForTokenTransfer( 
+    const priceObj = await nub.estimateGasForTokenTransfer( 
       PRED, 
       "0xD559864407F8B95a097200c85b657ED75db7cfc9", 
-      1000000, 
+      0, 
     );
 
-    Object.values(price_obj).forEach( value => {
+    Object.values(priceObj).forEach( value => {
+      // tslint:disable-next-line:no-unused-expression
       expect(value).toBeDefined
     });
   })
 
   test("Estimate Wrap gas", async () => {
-    const price_obj = await nub.wbnb.estimateWrapGas({amount: 1000000000, gasPrice});
+    const amount = 1000000000;
+    await bnb.send(user, amount.toString(), {from: binanceHotWallet6})
+    const priceObj = await nub.wbnb.estimateWrapGas({amount, gasPrice});
     
-    Object.values(price_obj).forEach( value => {
+    Object.values(priceObj).forEach( value => {
+      // tslint:disable-next-line:no-unused-expression
       expect(value).toBeDefined
     });
   });
 
   test("Estimate unwrap gas", async () => {
-    const price_obj = await nub.wbnb.estimateUnwrapGas({amount: 1000000000, gasPrice});
-    
-    Object.values(price_obj).forEach( value => {
+    const amount = 1000000000;
+    await wbnb.send(user, amount.toString(), {from: binanceHotWallet6});
+
+    const priceObj = await nub.wbnb.estimateUnwrapGas({amount, gasPrice});
+    Object.values(priceObj).forEach( value => {
+      // tslint:disable-next-line:no-unused-expression
       expect(value).toBeDefined
     });
   });
@@ -73,6 +82,12 @@ describe('Estimate gas', () => {
 describe("Wrap and Unwrap", () => {
   test("Wrap BNB", async() =>{
     const amount = 10000000000;
+    await ensureAllowance(
+      [bnb],
+      user,
+      Addresses.core[nub.CHAIN_ID].versions[2].implementations, 
+      [amount]
+    );
     // send bnb to user
     await bnb.send(user, amount.toString(), {from: binanceHotWallet6})
 
@@ -89,16 +104,19 @@ describe("Wrap and Unwrap", () => {
 
   test("Unwrap BNB", async() =>{
     const amount = 10000000000;
+    await ensureAllowance(
+      [wbnb],
+      user,
+      Addresses.core[nub.CHAIN_ID].versions[2].implementations, 
+      [amount]
+    );
     // send wbnb to user
     await wbnb.send(user, amount.toString(), {from: binanceHotWallet6});
 
-    const oldBnbBalance = await bnb.balanceOf(user);
     const oldWbnbBalance = await wbnb.balanceOf(user);
     const txReceipt = await nub.wbnb.unwrap({amount, gasPrice});
-    const newBnbBalance = await bnb.balanceOf(user);
     const newWbnbBalance = await wbnb.balanceOf(user);
     
-    //expect(new BigNumber(newBnbBalance).minus(oldBnbBalance).toNumber()).toBeGreaterThan(amount);
     expect(new BigNumber(oldWbnbBalance).minus(newWbnbBalance).toNumber()).toEqual(amount);
     expect(txReceipt).toBeDefined();
   })

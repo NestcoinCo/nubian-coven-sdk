@@ -1,0 +1,19 @@
+name: Verify Project
+on: 
+  pull_request
+jobs: 
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '12.x'
+          registry-url: 'https://registry.npmjs.org' 
+      - run: npm install
+      
+      - name: Run lint
+        run: npm run lint
+      
+      - name: Run test
+        run: npm run test --MORALIS_URL=${{ secrets.MORALIS_URL }}

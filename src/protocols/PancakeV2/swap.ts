@@ -16,11 +16,12 @@ export type SwapParams = {
 
 
 async function swap(this: PancakeV2, params: SwapParams){
-  let { amountA, amountB, tokenA, tokenB, slippage, receiver,
-    from, value, gas, gasPrice, nonce } = params;
-  let web3 = this.nub.web3;
+  let { slippage, receiver, from, value} = params;
+  const {amountA, amountB, tokenA, tokenB, gas, gasPrice, nonce } = params
+  const web3 = this.nub.web3;
   
-  let TokenA, TokenB;
+  let TokenA;
+  let TokenB;
   if(tokenA !== Addresses.bnb){
     TokenA = new Erc20(tokenA, web3);
   }else{
@@ -50,13 +51,13 @@ async function swap(this: PancakeV2, params: SwapParams){
   const _amountA = new BigNumber(amountA).times(new BigNumber(10).pow(await TokenA.decimals()));
   const _amountB = new BigNumber(amountB).times(new BigNumber(10).pow(await TokenB.decimals()));
   const [buyDecimal, sellDecimal] = [+(await TokenB.decimals()), +(await TokenA.decimals())];
-  const amountB_W_Slippage = (new BigNumber(_amountB)).minus(new BigNumber(_amountB).times(slippage));
-  const unitAmt = amountB_W_Slippage.div(_amountA).times(new BigNumber(10).pow(18-buyDecimal+sellDecimal)).toFixed(0);
+  const amountBWSlippage = (new BigNumber(_amountB)).minus(new BigNumber(_amountB).times(slippage));
+  const unitAmt = amountBWSlippage.div(_amountA).times(new BigNumber(10).pow(18-buyDecimal+sellDecimal)).toFixed(0);
 
   const route = (await this.getRoute(tokenA, tokenB))[1];
   
 
-  let spells = this.nub.Spell();
+  const spells = this.nub.Spell();
 
   // deposit in Wizard
   spells.add({

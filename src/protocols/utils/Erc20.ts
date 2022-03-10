@@ -3,7 +3,7 @@ import Web3 from "web3";
 import { maxUint256 } from "../../constants";
 import { Abi } from "../../constants/abi";
 
-interface txOptions{
+interface TxOptions{
   from: string,
   gasPrice?: string,
   gas?: number,
@@ -33,18 +33,18 @@ class Erc20{
     return balance;
   }
 
-  async approve(address: string){
-    return this.contract.methods.approve(address, maxUint256).call();
-  }
-
   async allowance(owner: string, spender:string){
     return this.contract.methods.allowance(owner, spender).call();
   }
 
   // write functions: used only in test files
-  async send(receiver: string, amount: string, options?: txOptions){
+  async send(receiver: string, amount: string, options?: TxOptions){
     return this.contract.methods.transfer(receiver, amount)
       .send(options)
+  }
+
+  async approve(address: string, options?: TxOptions){
+    return this.contract.methods.approve(address, maxUint256).send(options);
   }
 }
 
