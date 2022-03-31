@@ -73,7 +73,7 @@ async function swap(this: PancakeV2, params: SwapParams){
 
   // sell tokens in Pancakeswap
   spells.add({
-    connector: "Pancake",
+    connector: "PancakeV2",
     method: "sell",
     args: [
       route,

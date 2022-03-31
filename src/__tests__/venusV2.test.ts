@@ -2,7 +2,6 @@ import Web3 from "web3";
 import BigNumber from "bignumber.js";
 import NUB from "..";
 import { Addresses, getTokenAddress } from "../constants";
-import Bnb from "../protocols/utils/Bnb";
 import Erc20 from "../protocols/utils/Erc20";
 import { tokenMapping, vTokenMapping } from "../protocols/utils/venusMapping";
 import VToken from "../protocols/utils/VToken";
@@ -16,7 +15,7 @@ const hre = require("hardhat");
 let web3: Web3;
 let nub: NUB;
 let user: string;
-const vBag = 	"0xf977814e90da44bfa03b6295a0616a897441acec";
+const vBag = 	"0x3ddfa8ec3052539b6c9549f12cea2c295cff5296";
 
 beforeAll(async () => {
   hre.web3.eth.setProvider(new hre.Web3.providers.HttpProvider("http://localhost:8545"));
@@ -151,11 +150,11 @@ describe("Venus", () => {
 
     expect(+new BigNumber(vTokenBefore).minus(vTokenAfter).toFixed(0))
       .toBeGreaterThan(0);
-    expect(+new BigNumber(tokenBalanceAfter).minus(tokenBalanceBefore).toFixed(0))
-      .toEqual(+new BigNumber(10).pow(await Token.decimals()).times(tokenAmount).toFixed(0));
+    expect(new BigNumber(tokenBalanceAfter).minus(tokenBalanceBefore)
+      .eq(new BigNumber(10).pow(await Token.decimals()).times(tokenAmount))
+    ).toBeTruthy;
 
     // tslint:disable-next-line:no-unused-expression
     expect(tx?.status).toBeTruthy;
   })
-  
 });
