@@ -1,6 +1,6 @@
 {
   "name": "nubian-coven-sdk",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "sdk for connecting Nubian Coven Contracts. ",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
