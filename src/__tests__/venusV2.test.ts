@@ -150,6 +150,8 @@ describe("Venus", () => {
 
     expect(+new BigNumber(vTokenBefore).minus(vTokenAfter).toFixed(0))
       .toBeGreaterThan(0);
+
+    // tslint:disable-next-line:no-unused-expression
     expect(new BigNumber(tokenBalanceAfter).minus(tokenBalanceBefore)
       .eq(new BigNumber(10).pow(await Token.decimals()).times(tokenAmount))
     ).toBeTruthy;
