@@ -150,6 +150,16 @@ nub.erc20.transfer({
 | amount            | `string` | The amount of tokens you want to send. It must include the decimal places of the token. E.g `1*10**18` to send 1 WBNB. |
 | to                | `string` | The address you want to send the token to.                                                                             |
 
+#### Estimate Token Transfer Gas
+
+This helps you get the estimated gas needed to do a token transfer based on current network activity. It takes the same parameters as token transfer.
+
+```javascript
+nub.erc20.estimateTransferGas({
+  token, amount, to [, ...transactionConfig]
+}) => Promise<TransactionReceipt>
+```
+
 #### BNB Transfer
 
 For BNB transfers, use the eth transfer function. It also receives an object as input. It returns a promise that resolves to a transaction object.
@@ -217,6 +227,19 @@ nub.erc20.approve({
 | token             | `string` | Address of the token you want to approve for a spender.                                                                                                                         |
 | amount            | `string` | The amount of tokens to be approved for spending. If empty it defaults to [maxUint256](#maxuint256) i.e an infinite approval. It must include the decimal places of the token. E.g `1*10**18` to send 1 WBNB. (optional) |
 | to                | `string` | The address to be approved. It defaults to the Wizard address if not passed.(optional)                                                                              |
+
+#### Estimate Approval Gas
+
+This helps you get the estimated gas needed to do an approval based on current network activity. It takes the same parameters as approvals.
+
+```javascript
+nub.erc20.estimateApproveGas({
+  token
+  [, amount
+    [, to
+      [, ...transactionConfig]]]
+}) => Promise<GasObject>
+```
 
 #### Pancakeswap LpToken Price
 
