@@ -90,7 +90,7 @@ async function getRoute(this: PancakeV2, tokenIn:string, tokenOut: string): Prom
       const tokenDecimals = await tokenContract.methods.decimals().call();
       try{
         const amounts = (await this.router.methods.getAmountsOut(
-          (new BigNumber(10)).pow(tokenDecimals), 
+          (new BigNumber(10)).pow(tokenDecimals).toFixed(), 
           route).call());
         const amount = amounts[amounts.length-1];
         if((new BigNumber(amount)).gt(bestOutcome[0])) bestOutcome = [amount, route];
