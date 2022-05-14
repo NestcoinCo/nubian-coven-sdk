@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
 import PancakeV2 from ".";
 import { Addresses, getTokenAddress } from '../../constants';
-import { BASES_TO_CHECK_TRADES_AGAINST } from '../../constants/swapConstants';
+import { BASES_TO_CHECK_TRADES_AGAINST, INTERMEDIATE_BASES } from '../../constants/swapConstants';
 
 enum ORDER{
   IN,
@@ -18,12 +18,13 @@ async function getRoute(this: PancakeV2, tokenIn:string, tokenOut: string): Prom
 
   const getPairs = async (token: string, bases: string[], order?: ORDER ) => {
     const pairs: [string, string][] = [];
-    for(const base of bases){
-      if(base === token) continue;
-        const address = await this.factory.methods.getPair(token, base).call();
-        // tslint:disable-next-line:no-unused-expression
-        address !== Addresses.genesis && pairs.push(order === ORDER.IN ? [token, base]: [base, token]);
-    }
+    
+    await Promise.all(bases.map(async base => {
+      if(base === token) return;
+      const address = await this.factory.methods.getPair(token, base).call();
+      // tslint:disable-next-line:no-unused-expression
+      address !== Addresses.genesis && pairs.push(order === ORDER.IN ? [token, base]: [base, token]);
+    }));
     return pairs;
   }
 
@@ -36,56 +37,42 @@ async function getRoute(this: PancakeV2, tokenIn:string, tokenOut: string): Prom
   
   // two-hop routes
   let [tokenInPairs, tokenOutPairs]: [[string, string][], [string, string][]] = [[], []];
-  if(routes.length === 0){
-      tokenInPairs = await getPairs(_tokenIn, BASES_TO_CHECK_TRADES_AGAINST, ORDER.IN);
-      tokenOutPairs = await getPairs(_tokenOut, BASES_TO_CHECK_TRADES_AGAINST, ORDER.OUT);
-      tokenInPairs.forEach(pairIn => {
-      tokenOutPairs.forEach(pairOut => {
-        if(pairIn[1] === pairOut[0]){
-          routes.push([...pairIn, _tokenOut])
-        }
-      })
-    });
-  }
+  [tokenInPairs, tokenOutPairs] = await Promise.all([
+    getPairs(_tokenIn, BASES_TO_CHECK_TRADES_AGAINST, ORDER.IN),
+    getPairs(_tokenOut, BASES_TO_CHECK_TRADES_AGAINST, ORDER.OUT)
+  ]);
 
-  if(routes.length === 0){
-    const intermediatePairs: [string, string][] = [];
-    const length = BASES_TO_CHECK_TRADES_AGAINST.length;
-    for(let i=0; i < length; i++){
-      for(let j = i+1; j < length; j++){
-        try{
-          const pair = (await 
-          getPairs(BASES_TO_CHECK_TRADES_AGAINST[i], [BASES_TO_CHECK_TRADES_AGAINST[j]]))[0];
-          // tslint:disable-next-line:no-unused-expression
-          pair && intermediatePairs.push(pair);
-        }
-        catch(err){
-          console.log("Error in get pair", err)
-        }
+  tokenInPairs.forEach(pairIn => {
+  tokenOutPairs.forEach(pairOut => {
+      if(pairIn[1] === pairOut[0]){
+        routes.push([...pairIn, _tokenOut])
       }
-    }
-
-    // three-hop routes
-    const intermediateRoutes: string[][] = [];
-    tokenInPairs.forEach(pairIn => {
-      intermediatePairs.forEach(intermediatePair => {
-        if(pairIn[1] === intermediatePair[0]){
-          intermediateRoutes.push([...pairIn, intermediatePair[1]])
-        }
-      })
-    });
-    intermediateRoutes.forEach(routeIn => {
-      tokenOutPairs.forEach(pairOut => {
-        if(routeIn[2] === pairOut[0]){
-          routes.push([...routeIn, _tokenOut])
-        }
-      })
     })
-  };
+  });
+
+  const intermediatePairs: [string, string][] = INTERMEDIATE_BASES;
+
+  // three-hop routes
+  const intermediateRoutes: string[][] = [];
+  tokenInPairs.forEach(pairIn => {
+    intermediatePairs.forEach(intermediatePair => {
+      if(pairIn[1] === intermediatePair[0]){
+        intermediateRoutes.push([...pairIn, intermediatePair[1]])
+      }
+    })
+  });
+  intermediateRoutes.forEach(routeIn => {
+    tokenOutPairs.forEach(pairOut => {
+      if(routeIn[2] === pairOut[0]){
+        routes.push([...routeIn, _tokenOut])
+      }
+    })
+  })
 
   const getOptimalOutcome = async (_routes: string[][]) => {
     let bestOutcome: [string, string[]] = ["0", []];
-    for(const route of _routes){
+    let outcomes : [string, string[]][] = [];
+    await Promise.all(_routes.map(async (route, index) => {
       const tokenContract = new this.nub.web3.eth.Contract(this.ERC20_ABI, _tokenIn);
       const tokenDecimals = await tokenContract.methods.decimals().call();
       try{
@@ -93,18 +80,20 @@ async function getRoute(this: PancakeV2, tokenIn:string, tokenOut: string): Prom
           (new BigNumber(10)).pow(tokenDecimals).toFixed(), 
           route).call());
         const amount = amounts[amounts.length-1];
-        if((new BigNumber(amount)).gt(bestOutcome[0])) bestOutcome = [amount, route];
+        console.log(index);
+        outcomes.push([amount, route]);
       }catch(err){
         console.log("Error in getting amount", err);
       }
-    };
+    }));
+    bestOutcome = outcomes.reduce((a, b) =>  (new BigNumber(a[0])).gt(b[0]) ? a : b, ["0", ["", ""]]);
 
     // replaces WETH changes back to ETH
     bestOutcome[1][0] = tokenIn;
     bestOutcome[1][bestOutcome[1].length-1] = tokenOut;
     return bestOutcome;
   }
-  
+
   const optimalOutcome: [string, string[]] = await getOptimalOutcome(routes);
   return optimalOutcome;
 }
