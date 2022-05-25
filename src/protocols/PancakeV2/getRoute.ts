@@ -1,101 +1,146 @@
 import BigNumber from "bignumber.js";
 import PancakeV2 from ".";
-import { Addresses, getTokenAddress } from '../../constants';
-import { BASES_TO_CHECK_TRADES_AGAINST, INTERMEDIATE_BASES } from '../../constants/swapConstants';
+import { getTokenAddress } from '../../constants';
+import { BASES_TO_CHECK_TRADES_AGAINST as bases } from './constants';
+import { flatMap } from 'lodash';
+import { currencyEquals, JSBI, Pair, Percent, Token, TokenAmount, Trade, } from "@pancakeswap/sdk";
+import { multipleContractsSingleData } from "../../utils/multicall";
+import { Abi } from "../../constants/abi";
 
-enum ORDER{
-  IN,
-  OUT
+export enum DIRECTION{
+  IN = "IN",
+  OUT = "OUT"
 };
 
-async function getRoute(this: PancakeV2, tokenIn:string, tokenOut: string): Promise<[string, string[]]> {
+const ZERO_PERCENT = new Percent('0');
+const ONE_HUNDRED_PERCENT = new Percent('1')
+
+export function isTradeBetter(
+  tradeA: Trade | undefined | null,
+  tradeB: Trade | undefined | null,
+  minimumDelta: Percent = ZERO_PERCENT,
+): boolean | undefined {
+  if (tradeA && !tradeB) return false
+  if (tradeB && !tradeA) return true
+  if (!tradeA || !tradeB) return undefined
+
+  if (
+    tradeA.tradeType !== tradeB.tradeType ||
+    !currencyEquals(tradeA.inputAmount.currency, tradeB.inputAmount.currency) ||
+    !currencyEquals(tradeB.outputAmount.currency, tradeB.outputAmount.currency)
+  ) {
+    throw new Error('Trades are not comparable')
+  }
+
+  if (minimumDelta.equalTo(ZERO_PERCENT)) {
+    return tradeA.executionPrice.lessThan(tradeB.executionPrice)
+  }
+  return tradeA.executionPrice.raw.multiply(minimumDelta.add(ONE_HUNDRED_PERCENT)).lessThan(tradeB.executionPrice)
+}
+
+
+
+async function getRoute(this: PancakeV2, tokenIn:string, tokenOut: string, 
+  amount: string, direction: "IN" | "OUT", fresh: boolean = true): Promise<{amount: string, path: string[]}> {
   const BNB = getTokenAddress("BNB", this.nub);
-  const WBNB = getTokenAddress("WBNB", this.nub);
+  const WBNB = new Token(56, getTokenAddress("WBNB", this.nub), 18);
+  const MAX_HOPS = 3;
+  const BETTER_TRADE_LESS_HOPS_THRESHOLD = new Percent(JSBI.BigInt(50), JSBI.BigInt(10000))
 
-  const _tokenIn = tokenIn === BNB ? WBNB : tokenIn;
-  const _tokenOut = tokenOut === BNB ? WBNB : tokenOut;
-  if(_tokenIn === _tokenOut) throw new Error("TokenIn and TokenOut cannot be equal");
+  const [[decA], [decB]] = await multipleContractsSingleData({
+    web3: this.nub.web3, 
+    addresses: [tokenIn, tokenOut],
+    method: "decimals",
+    abi: Abi.basics.erc20
+  });
+  const parsedAmount = new BigNumber(10).pow(decA).times(amount);
 
-  const getPairs = async (token: string, bases: string[], order?: ORDER ) => {
-    const pairs: [string, string][] = [];
-    
-    await Promise.all(bases.map(async base => {
-      if(base === token) return;
-      const address = await this.factory.methods.getPair(token, base).call();
-      // tslint:disable-next-line:no-unused-expression
-      address !== Addresses.genesis && pairs.push(order === ORDER.IN ? [token, base]: [base, token]);
+  let tokenA = tokenIn.toLowerCase() === BNB.toLowerCase() ? WBNB : new Token(this.nub.CHAIN_ID, tokenIn, decA);
+  let tokenB =  tokenOut.toLowerCase() === BNB.toLowerCase() ? WBNB : new Token(this.nub.CHAIN_ID, tokenOut, decB);
+  let basePairs = flatMap(bases, (base): [Token, Token][] => bases.map((otherBase) => [base, otherBase]));
+
+  const pairTokens = [
+    [tokenA, tokenB],
+    ...bases.map( base => [base, tokenA]),
+    ...bases.map( base => [base, tokenB]),
+    ...basePairs,
+  ].filter( ([tokenA, tokenB]) => tokenA.address !== tokenB.address);
+
+  const pairAddresses = pairTokens.map( ([tokenA, tokenB]) => Pair.getAddress(tokenA, tokenB));
+  let pairs: {[key:string]: Pair} = {};
+
+  if(fresh){
+    const reserves = (await multipleContractsSingleData({
+      web3: this.nub.web3,
+      addresses: pairAddresses,
+      method: "getReserves",
+      abi: Abi.pancakeswap.v2.lpToken
     }));
-    return pairs;
+    pairs = reserves.map( (reserve, index) => {
+    if (reserve.length === 0) return undefined;
+    const [reserve0, reserve1] = reserve;
+    const [_tokenA, _tokenB] = pairTokens[index];
+
+    const [token0, token1] = _tokenA.sortsBefore(_tokenB) ? [_tokenA, _tokenB] : [_tokenB, _tokenA];
+    //@ts-ignore
+    return new Pair(
+      new TokenAmount(token0, new BigNumber(reserve0.hex).toFixed()), 
+      new TokenAmount(token1, new BigNumber(reserve1.hex).toFixed())
+    )
+    })
+      .filter(pair => pair !== undefined)
+      .reduce<{ [pairAddress: string]: Pair }>((memo, curr) => {
+        if(curr === undefined) return memo;
+        memo[curr.liquidityToken.address] = memo[curr.liquidityToken.address] ?? curr
+        return memo
+      }, 
+    {});
+    this.pairs = {...this.pairs, ...pairs};
+  }else {
+      pairAddresses.forEach( address => {
+      if( this.pairs[address] === undefined ) return;
+      pairs[address] = this.pairs[address];
+    })
   }
 
-  const directPair = (await getPairs(_tokenIn, [_tokenOut], ORDER.IN))[0];
-
-  const routes: string[][] = [];
-  // single-hop route
-  // tslint:disable-next-line:no-unused-expression
-  directPair && routes.push(directPair);
-  
-  // two-hop routes
-  let [tokenInPairs, tokenOutPairs]: [[string, string][], [string, string][]] = [[], []];
-  [tokenInPairs, tokenOutPairs] = await Promise.all([
-    getPairs(_tokenIn, BASES_TO_CHECK_TRADES_AGAINST, ORDER.IN),
-    getPairs(_tokenOut, BASES_TO_CHECK_TRADES_AGAINST, ORDER.OUT)
-  ]);
-
-  tokenInPairs.forEach(pairIn => {
-  tokenOutPairs.forEach(pairOut => {
-      if(pairIn[1] === pairOut[0]){
-        routes.push([...pairIn, _tokenOut])
-      }
-    })
-  });
-
-  const intermediatePairs: [string, string][] = INTERMEDIATE_BASES;
-
-  // three-hop routes
-  const intermediateRoutes: string[][] = [];
-  tokenInPairs.forEach(pairIn => {
-    intermediatePairs.forEach(intermediatePair => {
-      if(pairIn[1] === intermediatePair[0]){
-        intermediateRoutes.push([...pairIn, intermediatePair[1]])
-      }
-    })
-  });
-  intermediateRoutes.forEach(routeIn => {
-    tokenOutPairs.forEach(pairOut => {
-      if(routeIn[2] === pairOut[0]){
-        routes.push([...routeIn, _tokenOut])
-      }
-    })
-  })
-
-  const getOptimalOutcome = async (_routes: string[][]) => {
-    let bestOutcome: [string, string[]] = ["0", []];
-    let outcomes : [string, string[]][] = [];
-    await Promise.all(_routes.map(async (route, index) => {
-      const tokenContract = new this.nub.web3.eth.Contract(this.ERC20_ABI, _tokenIn);
-      const tokenDecimals = await tokenContract.methods.decimals().call();
-      try{
-        const amounts = (await this.router.methods.getAmountsOut(
-          (new BigNumber(10)).pow(tokenDecimals).toFixed(), 
-          route).call());
-        const amount = amounts[amounts.length-1];
-        console.log(index);
-        outcomes.push([amount, route]);
-      }catch(err){
-        console.log("Error in getting amount", err);
-      }
-    }));
-    bestOutcome = outcomes.reduce((a, b) =>  (new BigNumber(a[0])).gt(b[0]) ? a : b, ["0", ["", ""]]);
-
-    // replaces WETH changes back to ETH
-    bestOutcome[1][0] = tokenIn;
-    bestOutcome[1][bestOutcome[1].length-1] = tokenOut;
-    return bestOutcome;
+  let bestTradeSoFar;
+  for(let i = 1; i <= MAX_HOPS && Object.values(pairs).length > 0; i++){
+    const currentTrade = direction === DIRECTION.IN
+      ? Trade.bestTradeExactIn(
+          Object.values(pairs), 
+          new TokenAmount(tokenA, 
+          parsedAmount.toFixed()), 
+          tokenB, 
+          { maxHops: i, maxNumResults: 1 }
+        )[0]
+      : Trade.bestTradeExactOut(
+          Object.values(pairs), 
+          tokenA, 
+          new TokenAmount(tokenB, 
+          parsedAmount.toFixed()), 
+          { maxHops: i, maxNumResults: 1 }
+        )[0];
+    if (!currentTrade) continue;
+    bestTradeSoFar = 
+      bestTradeSoFar && isTradeBetter(bestTradeSoFar, currentTrade, BETTER_TRADE_LESS_HOPS_THRESHOLD) 
+        ? currentTrade 
+        : (bestTradeSoFar ?? currentTrade);
   }
 
-  const optimalOutcome: [string, string[]] = await getOptimalOutcome(routes);
-  return optimalOutcome;
+  if(bestTradeSoFar === undefined) return { amount: "", path: [] };
+
+  const path = bestTradeSoFar.route.path.map((token) => token.address);
+
+  // replace BNB addresses
+  path[0] = tokenIn.toLowerCase() === BNB.toLowerCase() 
+    ? tokenIn : path[0];
+  path[path.length-1] = tokenOut.toLowerCase() === BNB.toLowerCase() 
+    ? tokenOut : path[path.length-1];
+
+  return {
+    amount: direction === DIRECTION.IN ? bestTradeSoFar.outputAmount.toFixed() : bestTradeSoFar.inputAmount.toFixed(),
+    path: bestTradeSoFar.route.path.map((token) => token.address)
+  }
 }
 
 export default getRoute;
