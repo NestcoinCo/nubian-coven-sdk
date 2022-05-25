@@ -4,7 +4,6 @@
   "description": "sdk for connecting Nubian Coven Contracts. ",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "type": "module",
   "scripts": {
     "test:node": "npx hardhat node --fork $npm_config_moralis_url &",
     "test:jest": "sleep 20 && jest --config jestconfig.json --runInBand",
