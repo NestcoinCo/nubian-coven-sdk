@@ -41,22 +41,29 @@ export function isTradeBetter(
 
 
 async function getRoute(this: PancakeV2, tokenIn:string, tokenOut: string, 
-  amount: string, direction: "IN" | "OUT", fresh: boolean = true): Promise<{amount: string, path: string[]}> {
+  amount: string|number, direction: "IN" | "OUT", fresh: boolean = true): Promise<{amount: string, path: string[], 0: string, 1: string[]}> {
   const BNB = getTokenAddress("BNB", this.nub);
-  const WBNB = new Token(56, getTokenAddress("WBNB", this.nub), 18);
+  const WBNB = getTokenAddress("WBNB", this.nub);
   const MAX_HOPS = 3;
   const BETTER_TRADE_LESS_HOPS_THRESHOLD = new Percent(JSBI.BigInt(50), JSBI.BigInt(10000))
 
+  let _tokenIn = tokenIn.toLowerCase() === BNB.toLowerCase() ? WBNB : tokenIn;
+  let _tokenOut = tokenOut.toLowerCase() === BNB.toLowerCase() ? WBNB : tokenOut;
+  
   const [[decA], [decB]] = await multipleContractsSingleData({
     web3: this.nub.web3, 
-    addresses: [tokenIn, tokenOut],
+    addresses: [_tokenIn, _tokenOut],
     method: "decimals",
     abi: Abi.basics.erc20
   });
-  const parsedAmount = new BigNumber(10).pow(decA).times(amount);
+  if(!decA || !decB) return{ amount: "", path: [], 0: "", 1: [] };
 
-  let tokenA = tokenIn.toLowerCase() === BNB.toLowerCase() ? WBNB : new Token(this.nub.CHAIN_ID, tokenIn, decA);
-  let tokenB =  tokenOut.toLowerCase() === BNB.toLowerCase() ? WBNB : new Token(this.nub.CHAIN_ID, tokenOut, decB);
+
+  const parsedAmount = direction === DIRECTION.IN 
+    ? new BigNumber(10).pow(decA).times(amount) 
+    : new BigNumber(10).pow(decB).times(amount);
+  let tokenA = new Token(process.env.NODE_ENV === "test" ? 56 : this.nub.CHAIN_ID, _tokenIn, decA);
+  let tokenB = new Token(process.env.NODE_ENV === "test" ? 56 : this.nub.CHAIN_ID, _tokenOut, decB);
   let basePairs = flatMap(bases, (base): [Token, Token][] => bases.map((otherBase) => [base, otherBase]));
 
   const pairTokens = [
@@ -65,7 +72,7 @@ async function getRoute(this: PancakeV2, tokenIn:string, tokenOut: string,
     ...bases.map( base => [base, tokenB]),
     ...basePairs,
   ].filter( ([tokenA, tokenB]) => tokenA.address !== tokenB.address);
-
+  
   const pairAddresses = pairTokens.map( ([tokenA, tokenB]) => Pair.getAddress(tokenA, tokenB));
   let pairs: {[key:string]: Pair} = {};
 
@@ -127,7 +134,7 @@ async function getRoute(this: PancakeV2, tokenIn:string, tokenOut: string,
         : (bestTradeSoFar ?? currentTrade);
   }
 
-  if(bestTradeSoFar === undefined) return { amount: "", path: [] };
+  if(bestTradeSoFar === undefined) return { amount: "", path: [], 0: "", 1: [] };
 
   const path = bestTradeSoFar.route.path.map((token) => token.address);
 
@@ -137,9 +144,13 @@ async function getRoute(this: PancakeV2, tokenIn:string, tokenOut: string,
   path[path.length-1] = tokenOut.toLowerCase() === BNB.toLowerCase() 
     ? tokenOut : path[path.length-1];
 
+  const _amount = direction === DIRECTION.IN ? bestTradeSoFar.outputAmount.toFixed() : bestTradeSoFar.inputAmount.toFixed();
+
   return {
-    amount: direction === DIRECTION.IN ? bestTradeSoFar.outputAmount.toFixed() : bestTradeSoFar.inputAmount.toFixed(),
-    path: bestTradeSoFar.route.path.map((token) => token.address)
+    0: _amount,
+    1: path,
+    amount: _amount,
+    path
   }
 }
 
