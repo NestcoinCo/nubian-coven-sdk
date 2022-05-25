@@ -9,6 +9,7 @@ import { privateKey } from "./utils/constants";
 import ensureAllowance from "./utils/ensureAllowance";
 // tslint:disable-next-line:no-var-requires
 const hre = require("hardhat");
+import {TOKENS as tokens} from "../constants/addresses/mainnet/tokens";
 
 
 let web3: any;
@@ -39,8 +40,60 @@ beforeAll(async () => {
 })
 
 describe("Pancakeswap",  () => {
+  describe("getRoute tests", () => {
+    test("get the path and amount for a swap", async () => {
+      // check if it returns a swap path and amount
+      let {path, amount} = await nub.pancakeswap.getRoute(tokens.CAKE, tokens.USDC, "65546", "IN", true);
+      expect(path.length).toBeGreaterThan(1);
+      expect(amount).not.toEqual("");
+    });
 
-  // swap token for token
+    test("stores pair data", async () => {
+      await nub.pancakeswap.getRoute(tokens.ALICE, tokens.PRED, "456", "IN", true);
+      const before = new Date().getTime();
+      await nub.pancakeswap.getRoute(tokens.ALICE, tokens.PRED, "456", "OUT", false);
+      const after = new Date().getTime();
+
+      expect(after-before).toBeLessThan(1000);
+    });
+
+    test("returns a valid swap path", async () => {
+      const tokenIn = tokens.DOGE
+      const tokenOut = tokens.ALICE
+      let {path, amount} = await nub.pancakeswap.getRoute(tokenIn, tokenOut, "65546", "OUT", true);
+      expect(path[0]).toEqual(tokens.DOGE);
+      expect(path[path.length-1]).toEqual(tokens.ALICE);
+    });
+
+    test("considers getRoute for to BNB swaps", async () => {
+      let {path} = await nub.pancakeswap.getRoute(tokens.BNB, tokens.USDC, "65546", "IN", true);
+      expect(path[0]).toEqual(tokens.BNB);
+    });
+
+    test("considers getRoute for from BNB swaps", async () => {
+      let {path} = await nub.pancakeswap.getRoute(tokens.DOGE, tokens.BNB, "65546", "IN", true);
+      expect(path[path.length-1]).toEqual(tokens.BNB);
+    });
+
+    test("cannot getRoute for swap between two same tokens", async () => {
+      try{
+        let {path, amount} = await nub.pancakeswap.getRoute(tokens.DOGE, tokens.DOGE, "65546", "OUT", true);
+        expect(path.length).toEqual(0)
+        expect(amount).toEqual("");
+      }catch (error: any){
+        expect(error.message).toEqual("Invariant failed: ADDRESSES");
+      }
+    })
+
+    test("cannot getRoute for swap between tokens that don't have a path", async () => {
+      let {path, amount} = await nub.pancakeswap.getRoute(tokens.DOGE, "0xA07c5b74C9B40447a954e1466938b865b6BBea36", "65546", "OUT", true);
+      expect(path.length).toEqual(0)
+      expect(amount).toEqual("");
+    })
+  })
+
+
+  //swap token for token
   test("Swap token for token", async () => {
     // await new Promise(resolve => setTimeout(resolve, 30));
     const slippage = 2;
@@ -54,9 +107,8 @@ describe("Pancakeswap",  () => {
     const actualAmountA = new BigNumber(amountA).times(new BigNumber(10).pow(await TokenA.decimals())).toString();
     await TokenA.send(user, actualAmountA, {from: binanceHotWallet6})
 
-    const amountB = new BigNumber((await nub.pancakeswap.getRoute(tokenA, tokenB))[0]).times(amountA);
-    const slippageAmt = (new BigNumber(amountB)).minus(new BigNumber(amountB).times(slippage));
-    const _amountB = (new BigNumber(amountB)).div(new BigNumber(10).pow(await TokenB.decimals())).toFixed(0);
+    const { path, amount: amountB } = (await nub.pancakeswap.getRoute(tokenA, tokenB, amountA, "IN"));
+    const slippageAmt = (new BigNumber(amountB)).times(1-slippage).times(new BigNumber(10).pow(await TokenB.decimals())).toFixed(0);
 
     const balanceABefore = await TokenA.balanceOf(user);
     const balanceBBefore = await TokenB.balanceOf(user);
@@ -70,9 +122,10 @@ describe("Pancakeswap",  () => {
     const tx = (
       await nub.pancakeswap.swap({
       amountA,
-      amountB: _amountB,
+      amountB,
       tokenA,
       tokenB,
+      path,
       slippage,
       gasPrice: await nub.web3.eth.getGasPrice()
     })) as unknown as {status: boolean};
@@ -80,10 +133,10 @@ describe("Pancakeswap",  () => {
     const balanceAAfter = await TokenA.balanceOf(user);
     const balanceBAfter = await TokenB.balanceOf(user);
     
-    expect(+new BigNumber(balanceABefore).minus(balanceAAfter).toFixed(0))
-      .toEqual(+new BigNumber(10).pow(18).times(amountA).toFixed(0));
-    expect(+new BigNumber(balanceBAfter).minus(balanceBBefore).toFixed(0))
-      .toBeGreaterThanOrEqual(+slippageAmt.toFixed(0));
+    expect(new BigNumber(balanceABefore).minus(balanceAAfter).toFixed(0))
+      .toEqual(new BigNumber(10).pow(18).times(amountA).toFixed(0));
+    expect(BigInt(new BigNumber(balanceBAfter).minus(balanceBBefore).toFixed(0)))
+      .toBeGreaterThanOrEqual(BigInt(slippageAmt));
     // tslint:disable-next-line:no-unused-expression
     expect(tx?.status).toBeTruthy;
   });
@@ -103,9 +156,8 @@ describe("Pancakeswap",  () => {
     const actualAmountA = new BigNumber(amountA).times(new BigNumber(10).pow(await TokenA.decimals())).toString();
     await TokenA.send(user, actualAmountA, {from: binanceHotWallet6});
 
-    const amountB = new BigNumber((await nub.pancakeswap.getRoute(tokenA, tokenB))[0]).times(amountA);
-    const slippageAmt = (new BigNumber(amountB)).minus(new BigNumber(amountB).times(slippage));
-    const _amountB = amountB.div(new BigNumber(10).pow(await TokenB.decimals())).toFixed(0);
+    const { path, amount: amountB } = (await nub.pancakeswap.getRoute(tokenA, tokenB, amountA, "IN"));
+    const slippageAmt = (new BigNumber(amountB)).times(1-slippage).times(new BigNumber(10).pow(await TokenB.decimals())).toFixed(0);
 
     const balanceABefore = await TokenA.balanceOf(user);
     const balanceBBefore = await TokenB.balanceOf(user);
@@ -120,9 +172,10 @@ describe("Pancakeswap",  () => {
     const tx = (
       await nub.pancakeswap.swap({
       amountA,
-      amountB: _amountB,
+      amountB,
       tokenA,
       tokenB,
+      path,
       slippage,
       gasPrice: await nub.web3.eth.getGasPrice()
     })) as unknown as {status: boolean};
@@ -130,18 +183,18 @@ describe("Pancakeswap",  () => {
     const balanceAAfter = await TokenA.balanceOf(user);
     const balanceBAfter = await TokenB.balanceOf(user);
 
-    const differenceA = +new BigNumber(balanceABefore).minus(balanceAAfter).toFixed(0);
-    const differenceB = +new BigNumber(balanceBAfter).minus(balanceBBefore).toFixed(0);
-    expect(differenceA).toEqual(+new BigNumber(10).pow(18).times(amountA).toFixed(0));
-    expect(differenceB)
-      .toBeGreaterThanOrEqual(+slippageAmt.toFixed(0));
+    const differenceA = new BigNumber(balanceABefore).minus(balanceAAfter).toFixed(0);
+    const differenceB = new BigNumber(balanceBAfter).minus(balanceBBefore).toFixed(0);
+    expect(differenceA).toEqual(new BigNumber(10).pow(18).times(amountA).toFixed(0));
+    expect(BigInt(differenceB))
+      .toBeGreaterThanOrEqual(BigInt(slippageAmt));
 
     // tslint:disable-next-line:no-unused-expression
     expect(tx?.status).toBeTruthy;
   });
 
   test("Swap BNB for token", async () => {
-    // await new Promise(resolve => setTimeout(resolve, 30));
+    await new Promise(resolve => setTimeout(resolve, 30));
     const slippage = 2;
     const tokenA = getTokenAddress("BNB", nub);
 
@@ -154,10 +207,8 @@ describe("Pancakeswap",  () => {
     const actualAmountA = new BigNumber(amountA).times(new BigNumber(10).pow(await TokenA.decimals())).toString();
     await TokenA.send(user, actualAmountA, {from: binanceHotWallet6});
 
-    const amountB = new BigNumber((await nub.pancakeswap.getRoute(tokenA, tokenB))[0]).times(amountA);
-
-    const slippageAmt = (new BigNumber(amountB)).minus(new BigNumber(amountB).times(slippage));
-    const _amountB = Number((new BigNumber(amountB)).div(10 ** await TokenB.decimals()).toString())
+    const { path, amount: amountB } = (await nub.pancakeswap.getRoute(tokenA, tokenB, amountA, "IN"));
+    const slippageAmt = (new BigNumber(amountB)).times(1-slippage).times(new BigNumber(10).pow(await TokenB.decimals())).toFixed(0);
 
     const balanceABefore = await TokenA.balanceOf(user);
     const balanceBBefore = await TokenB.balanceOf(user);
@@ -171,9 +222,10 @@ describe("Pancakeswap",  () => {
     const tx = (
       await nub.pancakeswap.swap({
       amountA,
-      amountB: _amountB,
+      amountB,
       tokenA,
       tokenB,
+      path,
       slippage,
       gasPrice: await nub.web3.eth.getGasPrice()
     })) as unknown as {status: boolean};
@@ -181,13 +233,13 @@ describe("Pancakeswap",  () => {
     const balanceAAfter = await TokenA.balanceOf(user);
     const balanceBAfter = await TokenB.balanceOf(user);
     
-    expect(+new BigNumber(balanceABefore).minus(balanceAAfter).toFixed(0))
-      .toBeGreaterThan(+new BigNumber(10).pow(18).times(amountA).toFixed(0));
-    expect(+new BigNumber(balanceBAfter).minus(balanceBBefore).toFixed(0))
-      .toBeGreaterThanOrEqual(+slippageAmt.toFixed(0));
+    expect(BigInt(new BigNumber(balanceABefore).minus(balanceAAfter).toFixed(0)))
+      .toBeGreaterThan(BigInt(new BigNumber(10).pow(18).times(amountA).toFixed(0)));
+    expect(BigInt(new BigNumber(balanceBAfter).minus(balanceBBefore).toFixed(0)))
+      .toBeGreaterThanOrEqual(BigInt(slippageAmt));
     // tslint:disable-next-line:no-unused-expression
     expect(tx?.status).toBeTruthy;
-  });
+  })
 });
 
 
