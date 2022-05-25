@@ -9,7 +9,12 @@ var uniqueSlug = require('unique-slug')
 
 export const singleContractMultipleData = async ({ web3, address, abi, methods, methodParams = []}: 
   {web3: Web3, reference: string, address: string, abi: any, methods: string[], methodParams?: ((string|number)[])[]}) => {
-  const multicall = new Multicall({web3Instance: web3, tryAggregate: true});
+  const multicall = new Multicall({
+    web3Instance: web3, tryAggregate: true, 
+    multicallCustomContractAddress: process.env.NODE_ENV === "test" 
+      ? "0xC50F4c1E81c873B2204D7eFf7069Ffec6Fbe136D" 
+      : undefined
+  });
   const callReferences: string[] = [];
   const calls = methods.map( (method, index): ContractCallContext["calls"][0] => {
     const reference = uniqueSlug(); 
@@ -37,7 +42,12 @@ export const singleContractMultipleData = async ({ web3, address, abi, methods, 
 
 export const multipleContractsSingleData = async ({web3, addresses, abi, method, methodParams = []}: 
   {web3: Web3, addresses: string[], abi: any, method: string, methodParams?: (string|number)[]}) => {
-  const multicall = new Multicall({web3Instance: web3, tryAggregate: true});
+  const multicall = new Multicall({
+    web3Instance: web3, tryAggregate: true, 
+    multicallCustomContractAddress: process.env.NODE_ENV === "test" 
+      ? "0xC50F4c1E81c873B2204D7eFf7069Ffec6Fbe136D" 
+      : undefined
+  });
   const callReference = uniqueSlug();
   const calls: ContractCallContext["calls"] = [{
     methodName: method,
