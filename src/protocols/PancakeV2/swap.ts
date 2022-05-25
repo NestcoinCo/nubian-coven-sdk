@@ -10,14 +10,14 @@ export type SwapParams = {
   amountB: number | string;
   tokenA: string;
   tokenB: string;
-  slippage?: number,
-  receiver?: string
+  path: string[];
+  slippage?: number;
+  receiver?: string;
 } & Pick<TransactionConfig, 'from' | 'value' | 'gas' | 'gasPrice' | 'nonce'>;
 
-
 async function swap(this: PancakeV2, params: SwapParams){
-  let { slippage, receiver, from, value} = params;
-  const {amountA, amountB, tokenA, tokenB, gas, gasPrice, nonce } = params
+  let { slippage, receiver, from, value, path } = params;
+  const { amountA, amountB, tokenA, tokenB, gas, gasPrice, nonce } = params
   const web3 = this.nub.web3;
   
   let TokenA;
@@ -25,8 +25,7 @@ async function swap(this: PancakeV2, params: SwapParams){
   if(tokenA !== Addresses.bnb){
     TokenA = new Erc20(tokenA, web3);
   }else{
-    TokenA = new Bnb(web3)
-  
+    TokenA = new Bnb(web3);
   }
 
   if(tokenB !== Addresses.bnb){
@@ -54,9 +53,6 @@ async function swap(this: PancakeV2, params: SwapParams){
   const amountBWSlippage = (new BigNumber(_amountB)).minus(new BigNumber(_amountB).times(slippage));
   const unitAmt = amountBWSlippage.div(_amountA).times(new BigNumber(10).pow(18-buyDecimal+sellDecimal)).toFixed(0);
 
-  const route = (await this.getRoute(tokenA, tokenB))[1];
-  
-
   const spells = this.nub.Spell();
 
   // deposit in Wizard
@@ -76,7 +72,7 @@ async function swap(this: PancakeV2, params: SwapParams){
     connector: "PancakeV2",
     method: "sell",
     args: [
-      route,
+      path,
       _amountA,
       unitAmt,
       0,
