@@ -15,7 +15,8 @@ import { maxUint256 } from '../constants';
  */
 type ETHInputParams = {
   amount: string;
-} & Pick<TransactionConfig, 'from' | 'gas' | 'gasPrice' | 'nonce' | 'to'>;
+  to: string
+} & Pick<TransactionConfig, 'from' | 'gas' | 'gasPrice' | 'nonce'>;
 
 /**
  * generic ETH methods
