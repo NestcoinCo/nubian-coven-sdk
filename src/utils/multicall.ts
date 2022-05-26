@@ -5,7 +5,7 @@ import {
 } from "ethereum-multicall";
 import Web3 from "web3";
 
-var uniqueSlug = require('unique-slug')
+import uniqueSlug from 'unique-slug';
 
 export const singleContractMultipleData = async ({ web3, address, abi, methods, methodParams = []}: 
   {web3: Web3, reference: string, address: string, abi: any, methods: string[], methodParams?: ((string|number)[])[]}) => {
@@ -62,7 +62,7 @@ export const multipleContractsSingleData = async ({web3, addresses, abi, method,
     return {
       contractAddress: address,
       abi,
-      reference: reference,
+      reference,
       calls,
     }
   });

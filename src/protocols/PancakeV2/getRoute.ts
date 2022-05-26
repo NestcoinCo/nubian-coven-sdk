@@ -47,8 +47,8 @@ async function getRoute(this: PancakeV2, tokenIn:string, tokenOut: string,
   const MAX_HOPS = 3;
   const BETTER_TRADE_LESS_HOPS_THRESHOLD = new Percent(JSBI.BigInt(50), JSBI.BigInt(10000))
 
-  let _tokenIn = tokenIn.toLowerCase() === BNB.toLowerCase() ? WBNB : tokenIn;
-  let _tokenOut = tokenOut.toLowerCase() === BNB.toLowerCase() ? WBNB : tokenOut;
+  const _tokenIn = tokenIn.toLowerCase() === BNB.toLowerCase() ? WBNB : tokenIn;
+  const _tokenOut = tokenOut.toLowerCase() === BNB.toLowerCase() ? WBNB : tokenOut;
   
   const [[decA], [decB]] = await multipleContractsSingleData({
     web3: this.nub.web3, 
@@ -62,18 +62,18 @@ async function getRoute(this: PancakeV2, tokenIn:string, tokenOut: string,
   const parsedAmount = direction === DIRECTION.IN 
     ? new BigNumber(10).pow(decA).times(amount) 
     : new BigNumber(10).pow(decB).times(amount);
-  let tokenA = new Token(process.env.NODE_ENV === "test" ? 56 : this.nub.CHAIN_ID, _tokenIn, decA);
-  let tokenB = new Token(process.env.NODE_ENV === "test" ? 56 : this.nub.CHAIN_ID, _tokenOut, decB);
-  let basePairs = flatMap(bases, (base): [Token, Token][] => bases.map((otherBase) => [base, otherBase]));
+  const tokenA = new Token(process.env.NODE_ENV === "test" ? 56 : this.nub.CHAIN_ID, _tokenIn, decA);
+  const tokenB = new Token(process.env.NODE_ENV === "test" ? 56 : this.nub.CHAIN_ID, _tokenOut, decB);
+  const basePairs = flatMap(bases, (base): [Token, Token][] => bases.map((otherBase) => [base, otherBase]));
 
   const pairTokens = [
     [tokenA, tokenB],
     ...bases.map( base => [base, tokenA]),
     ...bases.map( base => [base, tokenB]),
     ...basePairs,
-  ].filter( ([tokenA, tokenB]) => tokenA.address !== tokenB.address);
-  
-  const pairAddresses = pairTokens.map( ([tokenA, tokenB]) => Pair.getAddress(tokenA, tokenB));
+  ].filter( ([_tokenA, _tokenB]) => _tokenA.address !== _tokenB.address);
+
+  const pairAddresses = pairTokens.map( ([_tokenA, _tokenB]) => {return Pair.getAddress(_tokenA, _tokenB)});
   let pairs: {[key:string]: Pair} = {};
 
   if(fresh){
@@ -89,7 +89,7 @@ async function getRoute(this: PancakeV2, tokenIn:string, tokenOut: string,
     const [_tokenA, _tokenB] = pairTokens[index];
 
     const [token0, token1] = _tokenA.sortsBefore(_tokenB) ? [_tokenA, _tokenB] : [_tokenB, _tokenA];
-    //@ts-ignore
+    // @ts-ignore
     return new Pair(
       new TokenAmount(token0, new BigNumber(reserve0.hex).toFixed()), 
       new TokenAmount(token1, new BigNumber(reserve1.hex).toFixed())

@@ -43,7 +43,7 @@ describe("Pancakeswap",  () => {
   describe("getRoute tests", () => {
     test("get the path and amount for a swap", async () => {
       // check if it returns a swap path and amount
-      let {path, amount} = await nub.pancakeswap.getRoute(tokens.CAKE, tokens.USDC, "65546", "IN", true);
+      const {path, amount} = await nub.pancakeswap.getRoute(tokens.CAKE, tokens.USDC, "65546", "IN", true);
       expect(path.length).toBeGreaterThan(1);
       expect(amount).not.toEqual("");
     });
@@ -60,24 +60,24 @@ describe("Pancakeswap",  () => {
     test("returns a valid swap path", async () => {
       const tokenIn = tokens.DOGE
       const tokenOut = tokens.ALICE
-      let {path, amount} = await nub.pancakeswap.getRoute(tokenIn, tokenOut, "65546", "OUT", true);
+      const {path} = await nub.pancakeswap.getRoute(tokenIn, tokenOut, "65546", "OUT", true);
       expect(path[0]).toEqual(tokens.DOGE);
       expect(path[path.length-1]).toEqual(tokens.ALICE);
     });
 
     test("considers getRoute for to BNB swaps", async () => {
-      let {path} = await nub.pancakeswap.getRoute(tokens.BNB, tokens.USDC, "65546", "IN", true);
+      const {path} = await nub.pancakeswap.getRoute(tokens.BNB, tokens.USDC, "65546", "IN", true);
       expect(path[0]).toEqual(tokens.BNB);
     });
 
     test("considers getRoute for from BNB swaps", async () => {
-      let {path} = await nub.pancakeswap.getRoute(tokens.DOGE, tokens.BNB, "65546", "IN", true);
+      const {path} = await nub.pancakeswap.getRoute(tokens.DOGE, tokens.BNB, "65546", "IN", true);
       expect(path[path.length-1]).toEqual(tokens.BNB);
     });
 
     test("cannot getRoute for swap between two same tokens", async () => {
       try{
-        let {path, amount} = await nub.pancakeswap.getRoute(tokens.DOGE, tokens.DOGE, "65546", "OUT", true);
+        const {path, amount} = await nub.pancakeswap.getRoute(tokens.DOGE, tokens.DOGE, "65546", "OUT", true);
         expect(path.length).toEqual(0)
         expect(amount).toEqual("");
       }catch (error: any){
@@ -86,14 +86,14 @@ describe("Pancakeswap",  () => {
     })
 
     test("cannot getRoute for swap between tokens that don't have a path", async () => {
-      let {path, amount} = await nub.pancakeswap.getRoute(tokens.DOGE, "0xA07c5b74C9B40447a954e1466938b865b6BBea36", "65546", "OUT", true);
+      const {path, amount} = await nub.pancakeswap.getRoute(tokens.DOGE, "0xA07c5b74C9B40447a954e1466938b865b6BBea36", "65546", "OUT", true);
       expect(path.length).toEqual(0)
       expect(amount).toEqual("");
     })
   })
 
 
-  //swap token for token
+  // swap token for token
   test("Swap token for token", async () => {
     // await new Promise(resolve => setTimeout(resolve, 30));
     const slippage = 2;

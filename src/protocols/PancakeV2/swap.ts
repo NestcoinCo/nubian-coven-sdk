@@ -16,8 +16,8 @@ export type SwapParams = {
 } & Pick<TransactionConfig, 'from' | 'value' | 'gas' | 'gasPrice' | 'nonce'>;
 
 async function swap(this: PancakeV2, params: SwapParams){
-  let { slippage, receiver, from, value, path } = params;
-  const { amountA, amountB, tokenA, tokenB, gas, gasPrice, nonce } = params
+  let { slippage, receiver, from, value } = params;
+  const { amountA, amountB, tokenA, tokenB, gas, gasPrice, nonce, path } = params
   const web3 = this.nub.web3;
   
   let TokenA;
