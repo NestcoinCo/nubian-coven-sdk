@@ -132,7 +132,7 @@ export class Erc20 {
   async estimateApproveGas(params: Erc20InputParams){
     const txObj: TransactionConfig = await this.approveTxObj(params);
     const gas = await this.getGas(txObj);
-    const gasPrice = this.nub.web3.eth.getGasPrice()
+    const gasPrice = await this.nub.web3.eth.getGasPrice()
 
     return {
       gas,
