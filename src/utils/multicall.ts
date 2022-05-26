@@ -4,8 +4,8 @@ import {
   ContractCallContext,
 } from "ethereum-multicall";
 import Web3 from "web3";
-
-import uniqueSlug from 'unique-slug';
+// tslint:disable-next-line
+const uniqueSlug = require('unique-slug')
 
 export const singleContractMultipleData = async ({ web3, address, abi, methods, methodParams = []}: 
   {web3: Web3, reference: string, address: string, abi: any, methods: string[], methodParams?: ((string|number)[])[]}) => {
