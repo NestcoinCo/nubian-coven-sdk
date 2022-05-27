@@ -169,10 +169,12 @@ nub.erc20.transfer({
 
 #### Estimate Token Transfer Gas
 
-Estimates the fee details needed to make a token transfer.
+This helps you get the estimated gas needed to do a token transfer based on current network activity. It takes the same parameters as token transfer.
 
-```js
-nub.erc20.estimateTransferGas({token, amount, to [, ...transactionConfig]})
+```javascript
+nub.erc20.estimateTransferGas({
+  token, amount, to [, ...transactionConfig]
+}) => Promise<TransactionReceipt>
 ```
 
 It returns a promise that resolves to the [gas object](#gas-object).
@@ -257,10 +259,15 @@ nub.erc20.approve({
 
 #### Estimate Approval Gas
 
-Estimates the fee details needed to make a token approval.
+This helps you get the estimated gas needed to do an approval based on current network activity. It takes the same parameters as approvals.
 
-```js
-nub.erc20.estimateApproveGas({token, to [, ...transactionConfig]})
+```javascript
+nub.erc20.estimateApproveGas({
+  token
+  [, amount
+    [, to
+      [, ...transactionConfig]]]
+}) => Promise<GasObject>
 ```
 
 It returns a promise that resolves to the [gas object](#gas-object).
