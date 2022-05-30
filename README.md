@@ -100,7 +100,7 @@ nub.pancakeswap.getRoute(
 
 
 This function returns a promise that resolves to an object.
-| Array Index | Type |Description |
+| Object Property | Type |Description |
 | ----------- | ---------|------------------------------------------------------- |
 | amount    |  `string`     |The amount of tokens you get from swap or amount of tokens needed for swap. Depends on the value of direction. Decimal points are applied. |
 | path      |  `string[]`  | An array of the path/route for possible token swap |
@@ -178,6 +178,7 @@ nub.erc20.estimateTransferGas({
 ```
 
 It returns a promise that resolves to the [gas object](#gas-object).
+
 
 #### BNB Transfer
 
