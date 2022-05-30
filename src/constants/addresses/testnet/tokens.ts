@@ -13,5 +13,6 @@ export const TOKENS = {
   BUSD_PRED_LP: "",
   WBNB_BUSD_LP: "",
   ALICE: "",
+  DOGE: ""
 }
   

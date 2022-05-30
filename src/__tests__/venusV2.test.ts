@@ -15,13 +15,18 @@ const hre = require("hardhat");
 let web3: Web3;
 let nub: NUB;
 let user: string;
-const vBag = 	"0x3ddfa8ec3052539b6c9549f12cea2c295cff5296";
+const vBag1 = "0xf977814e90da44bfa03b6295a0616a897441acec";
+const vBag2 = "0xEFDca55e4bCE6c1d535cb2D0687B5567eEF2AE83";
 
 beforeAll(async () => {
   hre.web3.eth.setProvider(new hre.Web3.providers.HttpProvider("http://localhost:8545"));
   await hre.network.provider.request({
     method: "hardhat_impersonateAccount",
-    params: [vBag],
+    params: [vBag1],
+  });
+  await hre.network.provider.request({
+    method: "hardhat_impersonateAccount",
+    params: [vBag2],
   });
 
   // web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545/"));
@@ -43,7 +48,7 @@ describe("Venus", () => {
 
     // send amount to user
     const actualAmount = new BigNumber(amount).times(new BigNumber(10).pow(await Token.decimals())).toString();
-    await Token.send(user, actualAmount, {from: vBag});
+    await Token.send(user, actualAmount, {from: vBag2});
 
     const tokenBalanceBefore = await Token.balanceOf(user);
 
@@ -85,7 +90,7 @@ describe("Venus", () => {
 
     // send amount to user
     const actualAmount = new BigNumber(vTokenAmount).times(new BigNumber(10).pow(await _VToken.decimals())).toString();
-    await _VToken.send(user, actualAmount, {from: vBag});
+    await _VToken.send(user, actualAmount, {from: vBag1});
 
     const tokenBalanceBefore = await Token.balanceOf(user);
     const vTokenBefore = await _VToken.balanceOf(user);
@@ -127,7 +132,7 @@ describe("Venus", () => {
     // send amount to user
     const vTokenAmount = await _VToken.getVTokens(tokenAmount, (await Token.decimals()).toString());
     const actualAmount = new BigNumber(vTokenAmount).times(new BigNumber(10).pow(await _VToken.decimals())).toFixed(0);
-    await _VToken.send(user, actualAmount, {from: vBag});
+    await _VToken.send(user, actualAmount, {from: vBag1});
 
     const tokenBalanceBefore = await Token.balanceOf(user);
     const vTokenBefore = await _VToken.balanceOf(user);

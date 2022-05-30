@@ -7,6 +7,7 @@ import { AbiItem } from "web3-utils";
 import getRoute from './getRoute';
 import getLpPrice from './getLpPrice';
 import swap from "./swap";
+import { Pair } from '@pancakeswap/sdk';
 
 
 export default class PancakeV2 {
@@ -29,6 +30,9 @@ export default class PancakeV2 {
   factory = new this.nub.web3.eth.Contract(this.FACTORY_ABI, 
     this.FACTORY_A
   );
+
+  // pairs used to persist pair data for getRoute
+  pairs: {[key: string]: Pair} = {};
 
   constructor(public nub: NUB) {
     
