@@ -9,6 +9,7 @@ export const core = {
       implementations: '0x5DDa94995d64fB239F7dE2971E90a36524605b52', // NubianImplementations
       account: '0xd29aFdfBCad1C249b0c69Eb2785b08353029282B', // NubianImplementationM1
       connectors: '0x21cf3ea572473f22597DE28c80cA6BFF94416151', // NubianConnector v2 (default)
+      wizard: ""
     },
   },
 };

@@ -208,7 +208,7 @@ export class NUB {
     return resp;
   }
 
-  public async estimateGasForTokenTransfer(tokenAddress: string, receiver: string, amount: number) {
+  public async estimateGasForTokenTransfer(tokenAddress: string, receiver: string, amount: string|number) {
     const contract = new this.web3.eth.Contract(Abi.basics.erc20, tokenAddress);
     const from = await this.internal.getAddress();
     const gasPrice = await this.web3.eth.getGasPrice();
@@ -216,14 +216,14 @@ export class NUB {
     return {gas, price: gasPrice, fee: gas * +gasPrice};
   }
 
-  public async transferToken(tokenAddress: string, receiver: string, amount: number) {
+  public async transferToken(tokenAddress: string, receiver: string, amount: string|number) {
     const contract = new this.web3.eth.Contract(Abi.basics.erc20, tokenAddress);
     const from = await this.internal.getAddress();
     const resp = await contract.methods.transfer(receiver, amount).send({ from });
     return resp;
   }
 
-  public async transferEth(receiver: string, amount: number) {
+  public async transferEth(receiver: string, amount: string|number) {
     const sender = await this.internal.getAddress();
     const resp = await this.web3.eth.sendTransaction({ from: sender, to: receiver, value: amount });
     return resp;

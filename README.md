@@ -55,7 +55,8 @@ nub.pancakeswap.swap({
   amountA, 
   amountB, 
   tokenA, 
-  tokenB 
+  tokenB,
+  path
   [, slippage 
     [, receiver 
       [, ...transactionConfig ]]]
@@ -70,9 +71,39 @@ This function swaps a token for another. It is a promise that resolves to a tran
 | **tokenB** |`string`| Address of token to swap to. Use `0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE` for BNB. |
 |**amountA**|`string/number`| Amount of `tokenA` to be swapped. |
 |**amountB**|`string/number`| Amount of `tokenB` expected to recieve from swap. You can use the [swap path](#util-methods) util method to deduce it.|
+|**path**| `string[]` | The tokens you want `tokenA` to swapped to before being swapped to `tokenB`.|
 | **slippage** |`number`| The percentage amount `amountB` can reduce by. E.g pass`2` if you do not want `amountB` from swap to go less than 2%. (optional).  |
 | **reciever** |`string` | The address to receive the swap output. It defaults to the address from the web3 instance in browser mode or the address of the private key in node environment. (optional) |
 |**transactionConfig**|`object`| It is an object that specifies blockchain transaction properties. Check [common terms](#common-terms) for an exhaustive description.|
+
+#### Swap Path/Token Price
+
+When swapping using Pancakeswap each token has a price and a swap path. The swap path refers to the tokens the token you want to swap will be exchanged with before being converted to the destination token. This function returns the most efficient path for the swap and the amount of tokens you get or need to supply.
+
+```js
+nub.pancakeswap.getRoute(
+  tokenIn, 
+  tokenOut, 
+  amount,
+  direction, 
+  fresh
+) => Promise<[string, string[]]>
+```
+
+| **Parameter** | **Type** | **Description** |
+|-----|---------|------|
+| **tokenIn** |`string`| Address of token to swap. Use `0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE` for BNB.|
+| **tokenOut** |`string`| Address of token to swap to. Use `0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE` for BNB. |
+|**amount**|`string`| Amount of `tokenIn` to swap or the amount of `tokenOut` you want. It should be formatted with the decimal points. |
+|**direction**|`IN\|OUT`| It is used to indicate which token owns `amount`. "IN" indicates `amount` is the number of tokens to swap while "OUT" indicates `amount` is the number of tokens you want from swap. |
+|**fresh**| `boolean` | When you first call getRoute on a pancakeswap instance, the details used to calculate the path are saved. `fresh` indicates if you want new details fetched from the chain or old details used. |
+
+
+This function returns a promise that resolves to an object.
+| Object Property | Type |Description |
+| ----------- | ---------|------------------------------------------------------- |
+| amount    |  `string`     |The amount of tokens you get from swap or amount of tokens needed for swap. Depends on the value of direction. Decimal points are applied. |
+| path      |  `string[]`  | An array of the path/route for possible token swap |
 
 #### Save
 
@@ -120,20 +151,6 @@ This function allows you to withdraw tokens saved in Venus protocol. You will ne
 
 ### Util Methods
 
-#### Swap Path/Token Price
-
-When swapping using Pancakeswap each token has a price and and a swap path. The swap path refers to the tokens the token you want to swap will be exchanged with before being converted to the destination token.
-
-```js
-nub.pancakeswap.getRoute(tokenIn, tokenOut) => Promise<[string, string[]]>
-```
-
-This function returns a promise that resolves to an array.
-| Array Index | Description                                             |
-| ----------- | ------------------------------------------------------- |
-| 0           | The exchange rate i.e TokenB/TokenA                     |
-| 1           | An array of the path/route used in completing the swap. |
-
 #### Token Transfer
 
 You can transfer tokens using the erc20 transfer function. It receives an object as input. It returns a promise that resolves to a transaction object
@@ -160,6 +177,9 @@ nub.erc20.estimateTransferGas({
 }) => Promise<TransactionReceipt>
 ```
 
+It returns a promise that resolves to the [gas object](#gas-object).
+
+
 #### BNB Transfer
 
 For BNB transfers, use the eth transfer function. It also receives an object as input. It returns a promise that resolves to a transaction object.
@@ -172,6 +192,16 @@ nub.eth.transfer({amount, to [, ...transactionConfig]}) => Promise<TransactionRe
 | ----------------- | ------ | -------------------------------------------------------------- |
 | amount            | `string` | The amount of BNB you want to send in wei (smallest BNB unit). |
 | to                | `string` | The address you want to send the BNB.                          |
+
+#### Estimate BNB Transfer Gas
+
+Estimates the fee details needed to make a token transfer.
+
+```js
+nub.eth.estimateTransferGas({amount, to [, ...transactionConfig]})
+```
+
+It returns a promise that resolves to the [gas object](#gas-object).
 
 #### Wrap BNB
 
@@ -240,6 +270,8 @@ nub.erc20.estimateApproveGas({
       [, ...transactionConfig]]]
 }) => Promise<GasObject>
 ```
+
+It returns a promise that resolves to the [gas object](#gas-object).
 
 #### Pancakeswap LpToken Price
 
