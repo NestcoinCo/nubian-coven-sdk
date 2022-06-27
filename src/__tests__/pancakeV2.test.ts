@@ -43,8 +43,9 @@ describe("Pancakeswap",  () => {
   describe("getRoute tests", () => {
     test("get the path and amount for a swap", async () => {
       // check if it returns a swap path and amount
-      const {path, amount} = await nub.pancakeswap.getRoute(tokens.CAKE, tokens.USDC, "65546", "IN", true);
+      const {path, amount, priceImpact} = await nub.pancakeswap.getRoute(tokens.CAKE, tokens.USDC, "65546", "IN", true);
       expect(path.length).toBeGreaterThan(1);
+      expect(priceImpact).toEqual(0);
       expect(amount).not.toEqual("");
     });
 
@@ -89,6 +90,13 @@ describe("Pancakeswap",  () => {
       const {path, amount} = await nub.pancakeswap.getRoute(tokens.DOGE, "0xA07c5b74C9B40447a954e1466938b865b6BBea36", "65546", "OUT", true);
       expect(path.length).toEqual(0)
       expect(amount).toEqual("");
+    })
+
+    test("returns a high impact for high value trades", async () => {
+      const tokenIn = tokens.DOGE
+      const tokenOut = tokens.ALICE
+      const {priceImpact} = await nub.pancakeswap.getRoute(tokenIn, tokenOut, "6554689878888887769", "IN", true);
+      expect(priceImpact).toEqual(4);
     })
   })
 
