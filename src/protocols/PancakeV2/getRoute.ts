@@ -57,15 +57,15 @@ export function computeTradePriceBreakdown(trade?: Trade | null): {
   priceImpactWithoutFee: Percent | undefined
   realizedLPFee: CurrencyAmount | undefined | null
 } {
-  const ONE_HUNDRED_PERCENT = new Percent(JSBI.BigInt(10000), JSBI.BigInt(10000))
+  const ONE_HUNDRED_PERCENT2 = new Percent(JSBI.BigInt(10000), JSBI.BigInt(10000))
   // for each hop in our trade, take away the x*y=k price impact from 0.3% fees
   // e.g. for 3 tokens/2 hops: 1 - ((1 - .03) * (1-.03))
   const realizedLPFee = !trade
     ? undefined
-    : ONE_HUNDRED_PERCENT.subtract(
+    : ONE_HUNDRED_PERCENT2.subtract(
         trade.route.pairs.reduce<Fraction>(
           (currentFee: Fraction): Fraction => currentFee.multiply(INPUT_FRACTION_AFTER_FEE),
-          ONE_HUNDRED_PERCENT,
+          ONE_HUNDRED_PERCENT2,
         ),
       )
 
